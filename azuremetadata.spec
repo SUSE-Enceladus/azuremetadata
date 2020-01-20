@@ -2,7 +2,7 @@
 # spec file for package azureMetaData
 # this code base is under development
 #
-# Copyright (c) 2015 SUSE LLC
+# Copyright (c) 2020 SUSE LLC
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -20,7 +20,7 @@ Name:           azuremetadata
 # For compatibility, remove provides 11/11/2015
 Provides:       azureMetaData
 Obsoletes:      azureMetaData <= 2.0.1
-Version:        4.0.1
+Version:        4.0.2
 Release:        0
 License:        GPL-3.0+
 Summary:        Collect instance metadata in Azure

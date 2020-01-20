@@ -1,4 +1,4 @@
-#Copyright (C) 2015 SUSE LLC
+#Copyright (C) 2020 SUSE LLC
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -17,12 +17,44 @@ package AzureDisk;
 use strict;
 use warnings;
 
+use File::Basename;
 use POSIX;
+
 
 our @ISA    = qw (Exporter);
 our @EXPORT_OK = qw (
     getVHDDiskTag
 );
+
+sub get_root_device {
+    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+        $atime,$mtime,$ctime,$blksize,$blocks) = stat('/');
+    my $device_idh = sprintf("%X", $dev);
+    my @block_devices = glob('/sys/block/*');
+    for my $block_device (@block_devices) {
+        my $found_root = 0;
+        my $block_device_name = basename($block_device);
+        my @partitions =
+            glob("/sys/block/$block_device_name/$block_device_name*");
+        for my $partition (@partitions) {
+            open my $device_info, '<', "$partition/dev";
+            read $device_info, my $device_data, -s $device_info;
+            close $device_info;
+            my @major_minor = split ':', $device_data;
+            my $minor = pop @major_minor;
+            my $major = pop @major_minor;
+            my $majorh = sprintf("%X", $major);
+            my $minorh = sprintf("%X", $minor);
+            if (length $minorh < 2) {
+                $minorh = '0' . $minorh;
+            }
+            my $current_device_ih = $majorh . $minorh;
+            if ($current_device_ih eq $device_idh) {
+                return "/dev/$block_device_name";
+            }
+        }
+    }
+}
 
 sub getVHDDiskTag {
     my $file = shift;
@@ -31,6 +63,9 @@ sub getVHDDiskTag {
     my $junk;
     my $result;
     my $done;
+    if (! $file) {
+        $file = get_root_device();
+    }
     if (! sysopen($fh,$file, O_RDONLY)) {
         die "open file $file failed: $!"
     }

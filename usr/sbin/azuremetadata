@@ -111,9 +111,6 @@ sub parse_options {
         print STDERR "Please provide a query option.";
         exit 1;
     }
-    if (! $options{device}) {
-        $options{device} = '/dev/sda';
-    }
     $options{output} = 'json';
     if ($options{xmlOut}) {
         $options{output} = 'xml';
@@ -143,8 +140,8 @@ sub usage {
     print "\n";
     print "  options\n";
     print "    [ --device | -d <image file or disk device> ]\n";
-    print "      Specify device for tag discovery. Default device\n";
-    print "      is set to '/dev/sda'\n";
+    print "      Specify device for tag discovery. If not specified\n";
+    print "      the device will be discovered.'\n";
     print "    [ --xml | -x ]\n";
     print "      Wrap information in XML markup\n";
     print "    [ --bare | -b ]\n";
