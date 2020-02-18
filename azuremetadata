@@ -6,7 +6,7 @@ from azuremetadata import azuremetadatautils, azuremetadata
 
 class PreserveArgumentOrder(argparse.Action):
     def __call__(self, parser, namespace, value, option_string=None):
-        if not 'ordered_args' in namespace:
+        if 'ordered_args' not in namespace:
             setattr(namespace, 'ordered_args', [])
         namespace.ordered_args.append((self.dest, value))
 
@@ -34,4 +34,3 @@ try:
 except azuremetadatautils.QueryException as e:
     print(e)
     exit(1)
-

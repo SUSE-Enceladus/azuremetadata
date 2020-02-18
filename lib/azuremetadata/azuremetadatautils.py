@@ -1,6 +1,3 @@
-from azuremetadata import azuremetadata
-
-
 class QueryException(Exception):
     pass
 
@@ -19,10 +16,8 @@ class AzureMetadataUtils:
     def _parse_data(self, data, parent_key=''):
         if isinstance(data, list):
             for item in data:
-                if isinstance(item, dict):
-                    self._parse_data(item, parent_key)
-                else:
-                    raise Exception("List of lists is not supported")
+                assert isinstance(item, dict), "Only list of dicts is supported"
+                self._parse_data(item, parent_key)
 
         elif isinstance(data, dict):
             for key, value in data.items():
