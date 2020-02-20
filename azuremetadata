@@ -19,12 +19,19 @@ for key in util.available_params.keys():
     parser.add_argument(f'--{key}', nargs='?', type=int, const=True, action=PreserveArgumentOrder)
 
 parser.add_argument('-h', '--help', action="store_true", help="Display help")
+parser.add_argument('-x', '--xml', action="store_true", help="Output as XML")
 
 args = parser.parse_args()
 ordered_args = getattr(args, 'ordered_args', [])
 
-if args.help or not len(ordered_args):
-    util.pretty_print()
+if args.help:
+    util.print_help()
+    exit()
+elif args.xml:
+    util.print_xml()
+    exit()
+elif not len(ordered_args):
+    util.print_pretty()
     exit()
 
 try:

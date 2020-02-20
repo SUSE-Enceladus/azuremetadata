@@ -14,7 +14,7 @@ data = {
 }
 
 
-def test_pretty_print(capsys):
+def test_help(capsys):
     expected_output = dedent("""
         --foo
             --bar
@@ -28,7 +28,54 @@ def test_pretty_print(capsys):
     """).lstrip()
 
     util = azuremetadatautils.AzureMetadataUtils(data)
-    util.pretty_print()
+    util.print_help()
+    captured = capsys.readouterr()
+
+    assert captured.out == expected_output
+    assert captured.err == ''
+
+
+def test_print_pretty(capsys):
+    expected_output = dedent("""
+        foo:
+            bar: 1
+        baz[0]:
+            bar:
+                foo: 2
+        baz[1]:
+            bar:
+                foo: 3
+        test: 4
+    """).lstrip()
+
+    util = azuremetadatautils.AzureMetadataUtils(data)
+    util.print_pretty()
+    captured = capsys.readouterr()
+
+    assert captured.out == expected_output
+    assert captured.err == ''
+
+
+def test_print_xml(capsys):
+    expected_output = dedent("""
+        <foo>
+            <bar>1</bar>
+        </foo>
+        <baz index='0'>
+            <bar>
+                <foo>2</foo>
+            </bar>
+        </baz>
+        <baz index='1'>
+            <bar>
+                <foo>3</foo>
+            </bar>
+        </baz>
+        <test>4</test>
+    """).lstrip()
+
+    util = azuremetadatautils.AzureMetadataUtils(data)
+    util.print_xml()
     captured = capsys.readouterr()
 
     assert captured.out == expected_output
