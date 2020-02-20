@@ -1,3 +1,6 @@
+import warnings
+
+
 class QueryException(Exception):
     pass
 
@@ -16,7 +19,10 @@ class AzureMetadataUtils:
     def _parse_data(self, data, parent_key=''):
         if isinstance(data, list):
             for item in data:
-                assert isinstance(item, dict), "Only list of dicts is supported"
+                if not isinstance(item, dict):
+                    warnings.warn("Only list of dicts is supported")
+                    return False
+
                 self._parse_data(item, parent_key)
 
         elif isinstance(data, dict):
@@ -26,10 +32,11 @@ class AzureMetadataUtils:
                 self._parents[key].append(parent_key)
 
                 if isinstance(value, (list, dict)):
-                    self._available_params[key] = value
-                    self._parse_data(value, key)
+                    if self._parse_data(value, key):
+                        self._available_params[key] = value
                 else:
                     self._available_params[key] = value
+        return True
 
     def pretty_print(self, data=None, depth=0):
         """Prints all available options as an indented tree."""

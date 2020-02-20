@@ -120,9 +120,10 @@ def test_available_params():
 
 
 def test_invalid_data():
-    invalid_data = {'foo': [[1], [2]]}
+    invalid_data = {'bad_key': [[1], [2]], 'foo': {'bar': 1}}
 
-    with pytest.raises(Exception) as e:
-        azuremetadatautils.AzureMetadataUtils(invalid_data)
+    with pytest.warns(UserWarning) as w:
+        util = azuremetadatautils.AzureMetadataUtils(invalid_data)
 
-    assert str(e.value) == 'List of lists is not supported'
+    assert str(w[0].message) == "Only list of dicts is supported"
+    assert util.available_params == {'bar': 1, 'foo': {'bar': 1}}
