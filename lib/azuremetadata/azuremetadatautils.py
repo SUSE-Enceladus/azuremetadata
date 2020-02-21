@@ -45,11 +45,14 @@ class AzureMetadataUtils:
     def print_help(self):
         self._pretty_print(self.PRINT_MODE_HELP, self._data)
 
-    def print_pretty(self):
-        self._pretty_print(self.PRINT_MODE_VALUES, self._data)
+    def print_pretty(self, print_xml=False, data=None):
+        if not data:
+            data = self._data
 
-    def print_xml(self):
-        self._pretty_print(self.PRINT_MODE_XML, self._data)
+        if print_xml:
+            self._pretty_print(self.PRINT_MODE_XML, data)
+        else:
+            self._pretty_print(self.PRINT_MODE_VALUES, data)
 
     def _pretty_print(self, print_mode, data, depth=0):
         """Prints all available options as an indented tree."""
@@ -120,7 +123,7 @@ class AzureMetadataUtils:
             if value is None:
                 raise QueryException(f"Nothing found for '{arg}'")
             else:
-                result.append((arg, value))
+                result.append({arg: value})
 
             root = self._available_params
 
