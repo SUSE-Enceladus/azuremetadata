@@ -45,50 +45,52 @@ class AzureMetadataUtils:
     def print_help(self):
         self._pretty_print(self.PRINT_MODE_HELP, self._data)
 
-    def print_pretty(self, print_xml=False, data=None):
+    def print_pretty(self, print_xml=False, data=None, file=None):
         if not data:
             data = self._data
 
         if print_xml:
-            self._pretty_print(self.PRINT_MODE_XML, data)
+            self._pretty_print(self.PRINT_MODE_XML, data, file=file)
         else:
-            self._pretty_print(self.PRINT_MODE_VALUES, data)
+            self._pretty_print(self.PRINT_MODE_VALUES, data, file=file)
 
-    def _pretty_print(self, print_mode, data, depth=0):
+    def _pretty_print(self, print_mode, data, depth=0, file=None):
         """Prints all available options as an indented tree."""
+
+        indent = ' ' * depth * 4
 
         for key, value in data.items():
             if isinstance(value, dict):
                 if print_mode == self.PRINT_MODE_HELP:
-                    print(f"{' ' * depth * 4}--{key}")
+                    print(f"{indent}--{key}", file=file)
                 elif print_mode == self.PRINT_MODE_VALUES:
-                    print(f"{' ' * depth * 4}{key}:")
+                    print(f"{indent}{key}:", file=file)
                 else:
-                    print(f"{' ' * depth * 4}<{key}>")
+                    print(f"{indent}<{key}>", file=file)
 
-                self._pretty_print(print_mode, value, depth + 1)
+                self._pretty_print(print_mode, value, depth=depth + 1, file=file)
 
                 if print_mode == self.PRINT_MODE_XML:
-                    print(f"{' ' * depth * 4}</{key}>")
+                    print(f"{indent}</{key}>", file=file)
             elif isinstance(value, list):
                 for idx, val in enumerate(value):
                     if print_mode == self.PRINT_MODE_HELP:
-                        print(f"{' ' * depth * 4}--{key} {idx}")
+                        print(f"{indent}--{key} {idx}", file=file)
                     elif print_mode == self.PRINT_MODE_VALUES:
-                        print(f"{' ' * depth * 4}{key}[{idx}]:")
+                        print(f"{indent}{key}[{idx}]:", file=file)
                     else:
-                        print(f"{' ' * depth * 4}<{key} index='{idx}'>")
+                        print(f"{indent}<{key} index='{idx}'>", file=file)
 
-                    self._pretty_print(print_mode, val, depth + 1)
+                    self._pretty_print(print_mode, val, depth=depth + 1, file=file)
                     if print_mode == self.PRINT_MODE_XML:
-                        print(f"{' ' * depth * 4}</{key}>")
+                        print(f"{indent}</{key}>", file=file)
             else:
                 if print_mode == self.PRINT_MODE_HELP:
-                    print(f"{' ' * depth * 4}--{key}")
+                    print(f"{indent}--{key}", file=file)
                 elif print_mode == self.PRINT_MODE_VALUES:
-                    print(f"{' ' * depth * 4}{key}: {value}")
+                    print(f"{indent}{key}: {value}", file=file)
                 else:
-                    print(f"{' ' * depth * 4}<{key}>{value}</{key}>")
+                    print(f"{indent}<{key}>{value}</{key}>", file=file)
 
     def query(self, args):
         """Generates output based on command line arguments."""

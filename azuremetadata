@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import sys
 import argparse
 from azuremetadata import azuremetadatautils, azuremetadata
 
@@ -42,21 +41,18 @@ try:
 
     fh = None
     if args.output:
-        print(args.output)
         fh = open(args.output, 'w')
-        sys.stdout = fh
 
     try:
         if not len(ordered_args):
-            util.print_pretty(print_xml)
+            util.print_pretty(print_xml, file=fh)
         else:
             result = util.query(ordered_args)
             for item in result:
-                util.print_pretty(print_xml, item)
+                util.print_pretty(print_xml, item, file=fh)
     finally:
         if fh:
             fh.close()
-            sys.stdout = sys.__stdout__
 
 except azuremetadatautils.QueryException as e:
     print(e)
