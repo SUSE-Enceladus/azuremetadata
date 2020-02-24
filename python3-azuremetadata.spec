@@ -19,6 +19,9 @@
 %define upstream_name azuremetadata
 Name:           python3-azuremetadata
 Version:        5.0.0
+# Packaged renamed in SLE15
+Provides:       azuremetadata
+Obsoletes:      azuremetadata < 5.0.0
 Release:        0
 Summary:        Python module for collecting instance metadata from GCE
 License:        GPL-3.0-or-later
@@ -29,10 +32,6 @@ Requires:       python3
 BuildRequires:  python3-setuptools
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildArch:      noarch
-
-# Package renamed in SLE 12, do not remove Provides, Obsolete directives
-# until after SLE 12 EOL
-Obsoletes:      azuremetadata
 
 %description
 A module for collecting instance metadata from Microsoft Azure.

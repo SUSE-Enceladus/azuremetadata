@@ -24,5 +24,5 @@ tar:
 	rm -rf "$(NAME)-$(verSrc)"
 
 install:
-	python setup.py install --prefix="$(PREFIX)" --root="$(DESTDIR)"
+	python3 setup.py install --prefix="$(PREFIX)" --root="$(DESTDIR)"
 
