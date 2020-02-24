@@ -20,8 +20,14 @@ parser.add_argument('-h', '--help', action="store_true", help="Display help")
 parser.add_argument('-x', '--xml', action="store_true", help="Output as XML")
 parser.add_argument('-o', '--output', action="store", help="Output file path")
 parser.add_argument('-a', '--api', action="store", help="API version")
+parser.add_argument(
+    '-t', '--tag', action="store", help="Read VHD disk tag from specified device (default: /dev/sda)",
+    nargs='?', const='/dev/sda'
+)
 
-data = azuremetadata.AzureMetadata(api_args.api).get_all()
+metadata = azuremetadata.AzureMetadata(api_args.api)
+data = metadata.get_all()
+
 util = azuremetadatautils.AzureMetadataUtils(data)
 for key in util.available_params.keys():
     parser.add_argument(f'--{key}', nargs='?', type=int, const=True, action=PreserveArgumentOrder)
@@ -29,15 +35,15 @@ for key in util.available_params.keys():
 args = parser.parse_args()
 ordered_args = getattr(args, 'ordered_args', [])
 
-print_xml = False
+if args.tag:
+    data['diskTag'] = metadata.get_disk_tag(args.tag)
 
 try:
     if args.help:
         util.print_help()
         exit()
 
-    if args.xml:
-        print_xml = True
+    print_xml = args.xml
 
     fh = None
     if args.output:

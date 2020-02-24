@@ -1,4 +1,5 @@
 import json
+import uuid
 
 
 class AzureMetadata:
@@ -37,3 +38,9 @@ class AzureMetadata:
                 return json.load(json_file)
         else:
             raise Exception("Unknown API version fixture exception (attested data)")
+
+    @staticmethod
+    def get_disk_tag(device='/dev/sda'):
+        with open(device, 'rb') as fh:
+            fh.seek(65536)
+            return str(uuid.UUID(bytes_le=fh.read(16)))
