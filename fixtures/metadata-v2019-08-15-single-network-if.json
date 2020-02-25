@@ -1,0 +1,95 @@
+{
+  "compute": {
+    "azEnvironment": "AzurePublicCloud",
+    "customData": "",
+    "location": "westeurope",
+    "name": "ivan-test",
+    "offer": "sles-15-sp1",
+    "osType": "Linux",
+    "placementGroupId": "",
+    "plan": {
+      "name": "",
+      "product": "",
+      "publisher": ""
+    },
+    "platformFaultDomain": "0",
+    "platformUpdateDomain": "0",
+    "provider": "Microsoft.Compute",
+    "publicKeys": [
+      {
+        "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJOjq92RQOKxR69Oc0CrnSRT3kzFIiTUcMRUq5km06E5PPsQcAbgx2l2h+8sp4p/Cadopf6Ibzr8DHhhY07Qgb9L/jZRS4QU00jpSFpYF3GlXpcbbw529soyZ3GU1YFUCeW2kcmI5zvJlKKeijyG+mONARJDa0T/LSgO0UQUJz9SlppOxwa7lNGI18rbXEMTbc/tEUNA1wksHIbfCSlTIQfBSsTDMZGMNdM6X2cJvReFJ6p6PBkxp/sSme0+KopAftT+69o8B+J6WnQDxvFwN02jID3bCgISO6+LBg2yINMHix6lFu4O3lk3tcLJu5kU2TXDCOE7Bfn3FJY32sVZqsmBpPLzkdCc8yDW8i9AYQAcM6vXym4FNZG6THMu4aOXNUM1vPOq+XWNAEDpWbH1uCJp/XAYTbmzzuMr/k8en8e7YpIdlFpZplaim8vjTk2GofmdLAENqzXo6Zm+lke9dMVuzQQrViOhK5Nidk46Nmkcjef+HyOr+yq3l3lIOfOJ6Ub9QbJ90Cl2g4hblVc2LmGUT5WnJnaduYGWiZLqbMt7u8BeqsMC/+tNCkecDUDtkDllIlyTPm+JiMnpV3l5jfQ/i80wZvyXFGZ8YFvEB6P49NGDmzaU54vc8AN1FXHby2IllDtjFqTIOoj1ld0dcAuySRmlKhaLKPd+wDudp2NQ==",
+        "path": "/home/ivan/.ssh/authorized_keys"
+      }
+    ],
+    "publisher": "suse",
+    "resourceGroupName": "ivan-test",
+    "resourceId": "/subscriptions/0feb9770-5976-4d28-9261-483d0ded7e36/resourceGroups/ivan-test/providers/Microsoft.Compute/virtualMachines/ivan-test",
+    "sku": "gen1",
+    "storageProfile": {
+      "dataDisks": [],
+      "imageReference": {
+        "id": "",
+        "offer": "sles-15-sp1",
+        "publisher": "suse",
+        "sku": "gen1",
+        "version": "latest"
+      },
+      "osDisk": {
+        "caching": "ReadWrite",
+        "createOption": "FromImage",
+        "diffDiskSettings": {
+          "option": ""
+        },
+        "diskSizeGB": "30",
+        "encryptionSettings": {
+          "enabled": "false"
+        },
+        "image": {
+          "uri": ""
+        },
+        "managedDisk": {
+          "id": "/subscriptions/0feb9770-5976-4d28-9261-483d0ded7e36/resourceGroups/IVAN-TEST/providers/Microsoft.Compute/disks/ivan-test_OsDisk_1_4ac55a52a0ea4f41ab9a814102280764",
+          "storageAccountType": "StandardSSD_LRS"
+        },
+        "name": "ivan-test_OsDisk_1_4ac55a52a0ea4f41ab9a814102280764",
+        "osType": "Linux",
+        "vhd": {
+          "uri": ""
+        },
+        "writeAcceleratorEnabled": "false"
+      }
+    },
+    "subscriptionId": "0feb9770-5976-4d28-9261-483d0ded7e36",
+    "tags": "",
+    "tagsList": [],
+    "version": "2019.11.13",
+    "vmId": "183baeab-a710-4184-9758-ca4491e7f1a8",
+    "vmScaleSetName": "",
+    "vmSize": "Basic_A0",
+    "zone": ""
+  },
+  "network": {
+    "interface": [
+      {
+        "ipv4": {
+          "ipAddress": [
+            {
+              "privateIpAddress": "172.16.0.4",
+              "publicIpAddress": "52.166.222.251"
+            }
+          ],
+          "subnet": [
+            {
+              "address": "172.16.0.0",
+              "prefix": "24"
+            }
+          ]
+        },
+        "ipv6": {
+          "ipAddress": []
+        },
+        "macAddress": "000D3AACB22A"
+      }
+    ]
+  }
+}
