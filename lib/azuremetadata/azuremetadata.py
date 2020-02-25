@@ -1,5 +1,9 @@
 import json
 import uuid
+import urllib.error
+import urllib.request
+from time import sleep
+from urllib.parse import quote
 
 
 class AzureMetadata:
@@ -16,31 +20,36 @@ class AzureMetadata:
         return result
 
     def get_instance_data(self):
-        # FIXME this is a stub while the CLI UX is being figured out
-
-        if self._api_version == '2019-08-15':
-            with open('fixtures/metadata-v2019-08-15-multiple-network-if.json', 'r') as json_file:
-                return json.load(json_file)
-        elif self._api_version == '2017-04-02':
-            with open('fixtures/metadata-v2017-04-02.json', 'r') as json_file:
-                return json.load(json_file)
-        else:
-            raise Exception("Unknown API version fixture exception")
+        return self._make_request(
+            f"http://169.254.169.254/metadata/instance?api-version={quote(self._api_version)}"
+        )
 
     def get_attested_data(self):
-        # FIXME this is a stub while the CLI UX is being figured out
-
-        if self._api_version == '2019-08-15':
-            with open('fixtures/attested-data-v2019-08-15.json', 'r') as json_file:
-                return json.load(json_file)
-        elif self._api_version == '2018-10-01':
-            with open('fixtures/attested-data-v2018-10-01.json', 'r') as json_file:
-                return json.load(json_file)
-        else:
-            raise Exception("Unknown API version fixture exception (attested data)")
+        return self._make_request(
+            f"http://169.254.169.254/metadata/attested/document?api-version={quote(self._api_version)}"
+        )
 
     @staticmethod
     def get_disk_tag(device='/dev/sda'):
         with open(device, 'rb') as fh:
             fh.seek(65536)
             return str(uuid.UUID(bytes_le=fh.read(16)))
+
+    def _make_request(self, url):
+        tries = 0
+        last_error = None
+        while tries < 5:
+            try:
+                req = urllib.request.Request(url, headers={'Metadata': 'true'})
+                response = urllib.request.urlopen(req)
+
+                # FIXME check response status code
+
+                data = response.read()
+                return json.loads(data)
+            except OSError as e:
+                tries += 1
+                last_error = e
+                sleep(1)
+
+        raise last_error from None
