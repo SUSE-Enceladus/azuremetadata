@@ -6,6 +6,10 @@ class QueryException(Exception):
 
 
 class AzureMetadataUtils:
+    PRINT_MODE_HELP = 1
+    PRINT_MODE_VALUES = 2
+    PRINT_MODE_XML = 3
+
     def __init__(self, data):
         self._data = data
         self._parents = {}
@@ -38,21 +42,55 @@ class AzureMetadataUtils:
                     self._available_params[key] = value
         return True
 
-    def pretty_print(self, data=None, depth=0):
-        """Prints all available options as an indented tree."""
+    def print_help(self):
+        self._pretty_print(self.PRINT_MODE_HELP, self._data)
+
+    def print_pretty(self, print_xml=False, data=None, file=None):
         if not data:
             data = self._data
 
+        if print_xml:
+            self._pretty_print(self.PRINT_MODE_XML, data, file=file)
+        else:
+            self._pretty_print(self.PRINT_MODE_VALUES, data, file=file)
+
+    def _pretty_print(self, print_mode, data, depth=0, file=None):
+        """Prints all available options as an indented tree."""
+
+        indent = ' ' * depth * 4
+
         for key, value in data.items():
             if isinstance(value, dict):
-                print(f"{' ' * depth * 4}--{key}")
-                self.pretty_print(value, depth + 1)
+                if print_mode == self.PRINT_MODE_HELP:
+                    print(f"{indent}--{key}", file=file)
+                elif print_mode == self.PRINT_MODE_VALUES:
+                    print(f"{indent}{key}:", file=file)
+                else:
+                    print(f"{indent}<{key}>", file=file)
+
+                self._pretty_print(print_mode, value, depth=depth + 1, file=file)
+
+                if print_mode == self.PRINT_MODE_XML:
+                    print(f"{indent}</{key}>", file=file)
             elif isinstance(value, list):
                 for idx, val in enumerate(value):
-                    print(f"{' ' * depth * 4}--{key} {idx}")
-                    self.pretty_print(val, depth + 1)
+                    if print_mode == self.PRINT_MODE_HELP:
+                        print(f"{indent}--{key} {idx}", file=file)
+                    elif print_mode == self.PRINT_MODE_VALUES:
+                        print(f"{indent}{key}[{idx}]:", file=file)
+                    else:
+                        print(f"{indent}<{key} index='{idx}'>", file=file)
+
+                    self._pretty_print(print_mode, val, depth=depth + 1, file=file)
+                    if print_mode == self.PRINT_MODE_XML:
+                        print(f"{indent}</{key}>", file=file)
             else:
-                print(f"{' ' * depth * 4}--{key}")
+                if print_mode == self.PRINT_MODE_HELP:
+                    print(f"{indent}--{key}", file=file)
+                elif print_mode == self.PRINT_MODE_VALUES:
+                    print(f"{indent}{key}: {value}", file=file)
+                else:
+                    print(f"{indent}<{key}>{value}</{key}>", file=file)
 
     def query(self, args):
         """Generates output based on command line arguments."""
@@ -87,7 +125,7 @@ class AzureMetadataUtils:
             if value is None:
                 raise QueryException(f"Nothing found for '{arg}'")
             else:
-                result.append((arg, value))
+                result.append({arg: value})
 
             root = self._available_params
 

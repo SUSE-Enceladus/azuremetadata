@@ -11,26 +11,49 @@ class PreserveArgumentOrder(argparse.Action):
         namespace.ordered_args.append((self.dest, value))
 
 
-data = azuremetadata.AzureMetadata().get()
-util = azuremetadatautils.AzureMetadataUtils(data)
+api_version_parser = argparse.ArgumentParser(add_help=False)
+api_version_parser.add_argument('-a', '--api', action="store", help="API version", nargs='?', const=None)
+api_args, _ = api_version_parser.parse_known_args()
 
 parser = argparse.ArgumentParser(add_help=False)
+parser.add_argument('-h', '--help', action="store_true", help="Display help")
+parser.add_argument('-x', '--xml', action="store_true", help="Output as XML")
+parser.add_argument('-o', '--output', action="store", help="Output file path")
+parser.add_argument('-a', '--api', action="store", help="API version")
+
+data = azuremetadata.AzureMetadata(api_args.api).get_all()
+util = azuremetadatautils.AzureMetadataUtils(data)
 for key in util.available_params.keys():
     parser.add_argument(f'--{key}', nargs='?', type=int, const=True, action=PreserveArgumentOrder)
-
-parser.add_argument('-h', '--help', action="store_true", help="Display help")
 
 args = parser.parse_args()
 ordered_args = getattr(args, 'ordered_args', [])
 
-if args.help or not len(ordered_args):
-    util.pretty_print()
-    exit()
+print_xml = False
 
 try:
-    result = util.query(ordered_args)
-    for item in result:
-        print(f"{item[0]}: {item[1]}")
+    if args.help:
+        util.print_help()
+        exit()
+
+    if args.xml:
+        print_xml = True
+
+    fh = None
+    if args.output:
+        fh = open(args.output, 'w')
+
+    try:
+        if not len(ordered_args):
+            util.print_pretty(print_xml, file=fh)
+        else:
+            result = util.query(ordered_args)
+            for item in result:
+                util.print_pretty(print_xml, item, file=fh)
+    finally:
+        if fh:
+            fh.close()
+
 except azuremetadatautils.QueryException as e:
     print(e)
     exit(1)
