@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 
-from flask import Flask, escape, request, send_from_directory
+from flask import Flask, request, send_from_directory
 from werkzeug.exceptions import NotFound
 
 
 app = Flask(__name__)
-
-
-@app.route('/')
-def hello():
-    name = request.args.get("name", "World")
-    return f'Hello, {escape(name)}!'
 
 
 @app.route('/metadata/instance')
@@ -21,7 +15,7 @@ def instance():
         try:
             return send_from_directory('fixtures', f'metadata-v{api_version}.json')
         except NotFound:
-            return f'Unknown API version', 400
+            return f'Unknown API version', 404
     else:
         return f'API version not specified', 400
 
@@ -34,7 +28,7 @@ def attested_document():
         try:
             return send_from_directory('fixtures', f'attested-data-v{api_version}.json')
         except NotFound:
-            return f'Unknown API version', 400
+            return f'Unknown API version', 404
     else:
         return f'API version not specified', 400
 

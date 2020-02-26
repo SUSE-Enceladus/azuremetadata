@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
 import argparse
+import urllib.error
+import sys
 from azuremetadata import azuremetadatautils, azuremetadata
 
 
@@ -12,33 +14,33 @@ class PreserveArgumentOrder(argparse.Action):
 
 
 api_version_parser = argparse.ArgumentParser(add_help=False)
-api_version_parser.add_argument('-a', '--api', action="store", help="API version", nargs='?', const=None)
+api_version_parser.add_argument('-a', '--api', nargs='?', const=None)
+api_version_parser.add_argument('-t', '--tag', action="store_true")
+api_version_parser.add_argument('--device', nargs='?', const=None)
 api_args, _ = api_version_parser.parse_known_args()
 
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument('-h', '--help', action="store_true", help="Display help")
 parser.add_argument('-x', '--xml', action="store_true", help="Output as XML")
-parser.add_argument('-o', '--output', action="store", help="Output file path")
-parser.add_argument('-a', '--api', action="store", help="API version")
-parser.add_argument(
-    '-t', '--tag', action="store", help="Read VHD disk tag from specified device (default: /dev/sda)",
-    nargs='?', const='/dev/sda'
-)
-
-metadata = azuremetadata.AzureMetadata(api_args.api)
-data = metadata.get_all()
-
-util = azuremetadatautils.AzureMetadataUtils(data)
-for key in util.available_params.keys():
-    parser.add_argument(f'--{key}', nargs='?', type=int, const=True, action=PreserveArgumentOrder)
-
-args = parser.parse_args()
-ordered_args = getattr(args, 'ordered_args', [])
-
-if args.tag:
-    data['diskTag'] = metadata.get_disk_tag(args.tag)
+parser.add_argument('-o', '--output', help="Output file path")
+parser.add_argument('-a', '--api', help="API version")
+parser.add_argument('-t', '--tag', help="Read VHD disk tag", action="store_true")
+parser.add_argument('--device', help="Device to read disk tag from (default: root device)", nargs='?')
 
 try:
+    metadata = azuremetadata.AzureMetadata(api_args.api)
+    data = metadata.get_all()
+
+    if api_args.tag:
+        data['billingTag'] = metadata.get_disk_tag(api_args.device)
+
+    util = azuremetadatautils.AzureMetadataUtils(data)
+    for key in util.available_params.keys():
+        parser.add_argument(f'--{key}', nargs='?', type=int, const=True, action=PreserveArgumentOrder)
+
+    args = parser.parse_args()
+    ordered_args = getattr(args, 'ordered_args', [])
+
     if args.help:
         util.print_help()
         exit()
@@ -61,5 +63,10 @@ try:
             fh.close()
 
 except azuremetadatautils.QueryException as e:
-    print(e)
+    print(e, file=sys.stderr)
+    exit(1)
+except urllib.error.HTTPError as e:
+    print("An error occurred when fetching metadata:", file=sys.stderr)
+    print(str(e), file=sys.stderr)
+    print(e.read(), file=sys.stderr)
     exit(1)
