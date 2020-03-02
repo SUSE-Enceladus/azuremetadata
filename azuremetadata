@@ -15,13 +15,14 @@ class PreserveArgumentOrder(argparse.Action):
 
 api_version_parser = argparse.ArgumentParser(add_help=False)
 api_version_parser.add_argument('-a', '--api', nargs='?', const=None)
-api_version_parser.add_argument('-t', '--tag', action="store_true")
+api_version_parser.add_argument('--tag', action="store_true")
 api_version_parser.add_argument('--device', nargs='?', const=None)
 api_args, _ = api_version_parser.parse_known_args()
 
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument('-h', '--help', action="store_true", help="Display help")
 parser.add_argument('-x', '--xml', action="store_true", help="Output as XML")
+parser.add_argument('-j', '--json', action="store_true", help="Output as JSON")
 parser.add_argument('-o', '--output', help="Output file path")
 parser.add_argument('-a', '--api', help="API version")
 parser.add_argument('-t', '--tag', help="Read VHD disk tag", action="store_true")
@@ -29,10 +30,11 @@ parser.add_argument('--device', help="Device to read disk tag from (default: roo
 
 try:
     metadata = azuremetadata.AzureMetadata(api_args.api)
-    data = metadata.get_all()
 
     if api_args.tag:
-        data['billingTag'] = metadata.get_disk_tag(api_args.device)
+        data = {'billingTag': metadata.get_disk_tag(api_args.device)}
+    else:
+        data = metadata.get_all()
 
     util = azuremetadatautils.AzureMetadataUtils(data)
     for key in util.available_params.keys():
@@ -45,19 +47,17 @@ try:
         util.print_help()
         exit()
 
-    print_xml = args.xml
-
     fh = None
     if args.output:
         fh = open(args.output, 'w')
 
     try:
         if not len(ordered_args):
-            util.print_pretty(print_xml, file=fh)
+            util.print_pretty(print_xml=args.xml, print_json=args.json, file=fh)
         else:
             result = util.query(ordered_args)
             for item in result:
-                util.print_pretty(print_xml, item, file=fh)
+                util.print_pretty(print_xml=args.xml, print_json=args.json, data=item, file=fh)
     finally:
         if fh:
             fh.close()

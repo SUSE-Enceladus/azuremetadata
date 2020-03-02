@@ -1,4 +1,5 @@
 import warnings
+import json
 
 
 class QueryException(Exception):
@@ -45,11 +46,13 @@ class AzureMetadataUtils:
     def print_help(self):
         self._pretty_print(self.PRINT_MODE_HELP, self._data)
 
-    def print_pretty(self, print_xml=False, data=None, file=None):
+    def print_pretty(self, print_xml=False, print_json=False, data=None, file=None):
         if not data:
             data = self._data
 
-        if print_xml:
+        if print_json:
+            print(json.dumps(data), file=file)
+        elif print_xml:
             self._pretty_print(self.PRINT_MODE_XML, data, file=file)
         else:
             self._pretty_print(self.PRINT_MODE_VALUES, data, file=file)

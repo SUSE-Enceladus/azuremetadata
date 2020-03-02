@@ -75,7 +75,18 @@ def test_print_xml(capsys):
     """).lstrip()
 
     util = azuremetadatautils.AzureMetadataUtils(data)
-    util.print_pretty(True)
+    util.print_pretty(print_xml=True)
+    captured = capsys.readouterr()
+
+    assert captured.out == expected_output
+    assert captured.err == ''
+
+
+def test_print_json(capsys):
+    expected_output = """{"foo": {"bar": 1}, "baz": [{"bar": {"foo": 2}}, {"bar": {"foo": 3}}], "test": 4}\n"""
+
+    util = azuremetadatautils.AzureMetadataUtils(data)
+    util.print_pretty(print_json=True)
     captured = capsys.readouterr()
 
     assert captured.out == expected_output
