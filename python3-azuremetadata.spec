@@ -22,6 +22,7 @@ Version:        5.0.0
 # Packaged renamed in SLE15
 Provides:       azuremetadata
 Obsoletes:      azuremetadata < 5.0.0
+Conflicts:      regionServiceClientConfigAzure <= 0.0.4
 Release:        0
 Summary:        Python module for collecting instance metadata from GCE
 License:        GPL-3.0-or-later
