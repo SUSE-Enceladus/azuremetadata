@@ -3,6 +3,7 @@
 import argparse
 import urllib.error
 import sys
+import json
 from azuremetadata import azuremetadatautils, azuremetadata
 
 
@@ -17,6 +18,7 @@ api_version_parser = argparse.ArgumentParser(add_help=False)
 api_version_parser.add_argument('-a', '--api', nargs='?', const=None)
 api_version_parser.add_argument('--tag', action="store_true")
 api_version_parser.add_argument('--device', nargs='?', const=None)
+api_version_parser.add_argument('-x', '--xml', action="store_true")
 api_args, _ = api_version_parser.parse_known_args()
 
 parser = argparse.ArgumentParser(add_help=False)
@@ -33,6 +35,11 @@ try:
 
     if api_args.tag:
         data = {'billingTag': metadata.get_disk_tag(api_args.device)}
+
+        # A hack for backward compatibility with the old azuremetadata and registration
+        if api_args.xml:
+            print('<document>' + json.dumps(data) + '</document>')
+            exit()
     else:
         data = metadata.get_all()
 
