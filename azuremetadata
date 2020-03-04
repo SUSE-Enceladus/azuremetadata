@@ -16,9 +16,7 @@ class PreserveArgumentOrder(argparse.Action):
 
 api_version_parser = argparse.ArgumentParser(add_help=False)
 api_version_parser.add_argument('-a', '--api', nargs='?', const=None)
-api_version_parser.add_argument('--tag', action="store_true")
 api_version_parser.add_argument('--device', nargs='?', const=None)
-api_version_parser.add_argument('-x', '--xml', action="store_true")
 api_args, _ = api_version_parser.parse_known_args()
 
 parser = argparse.ArgumentParser(add_help=False)
@@ -27,21 +25,13 @@ parser.add_argument('-x', '--xml', action="store_true", help="Output as XML")
 parser.add_argument('-j', '--json', action="store_true", help="Output as JSON")
 parser.add_argument('-o', '--output', help="Output file path")
 parser.add_argument('-a', '--api', help="API version")
-parser.add_argument('-t', '--tag', help="Read VHD disk tag", action="store_true")
 parser.add_argument('--device', help="Device to read disk tag from (default: root device)", nargs='?')
 
 try:
     metadata = azuremetadata.AzureMetadata(api_args.api)
 
-    if api_args.tag:
-        data = {'billingTag': metadata.get_disk_tag(api_args.device)}
-
-        # A hack for backward compatibility with the old azuremetadata and registration
-        if api_args.xml:
-            print('<document>' + json.dumps(data) + '</document>')
-            exit()
-    else:
-        data = metadata.get_all()
+    data = metadata.get_all()
+    data['billingTag'] = metadata.get_disk_tag(api_args.device)
 
     util = azuremetadatautils.AzureMetadataUtils(data)
     for key in util.available_params.keys():
@@ -71,9 +61,4 @@ try:
 
 except azuremetadatautils.QueryException as e:
     print(e, file=sys.stderr)
-    exit(1)
-except urllib.error.HTTPError as e:
-    print("An error occurred when fetching metadata:", file=sys.stderr)
-    print(str(e), file=sys.stderr)
-    print(e.read(), file=sys.stderr)
     exit(1)

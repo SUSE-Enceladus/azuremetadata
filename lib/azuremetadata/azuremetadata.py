@@ -4,6 +4,7 @@ import os
 import glob
 import urllib.error
 import urllib.request
+import sys
 from time import sleep
 from urllib.parse import quote
 
@@ -35,9 +36,15 @@ class AzureMetadata:
         if not device:
             device = self._find_root_device()
 
-        with open(device, 'rb') as fh:
-            fh.seek(65536)
-            return str(uuid.UUID(bytes_le=fh.read(16)))
+        if not device:
+            return ''
+
+        try:
+            with open(device, 'rb') as fh:
+                fh.seek(65536)
+                return str(uuid.UUID(bytes_le=fh.read(16)))
+        except OSError:
+            return ''
 
     @staticmethod
     def _find_root_device():
@@ -56,7 +63,7 @@ class AzureMetadata:
                 if device_id == root_device_id:
                     return f"/dev/{device}"
 
-        raise Exception("Can't find root device")
+        return None
 
     @staticmethod
     def _make_request(url):
@@ -65,15 +72,20 @@ class AzureMetadata:
         while tries < 5:
             try:
                 req = urllib.request.Request(url, headers={'Metadata': 'true'})
-                response = urllib.request.urlopen(req)
+                response = urllib.request.urlopen(req, timeout=1)
 
                 data = response.read()
                 return json.loads(data)
             except urllib.error.HTTPError as e:
-                raise e
+                print("An error occurred when fetching metadata:", file=sys.stderr)
+                print(str(e), file=sys.stderr)
+                print(e.read(), file=sys.stderr)
+                return {}
             except OSError as e:
                 tries += 1
                 last_error = e
                 sleep(1)
 
-        raise last_error
+        print("An error occurred when fetching metadata:", file=sys.stderr)
+        print(str(last_error), file=sys.stderr)
+        return {}

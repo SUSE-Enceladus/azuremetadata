@@ -50,10 +50,10 @@ class AzureMetadataUtils:
         if not data:
             data = self._data
 
-        if print_json:
+        if print_xml:
+            print('<document>' + json.dumps(data) + '</document>', file=file)
+        elif print_json:
             print(json.dumps(data), file=file)
-        elif print_xml:
-            self._pretty_print(self.PRINT_MODE_XML, data, file=file)
         else:
             self._pretty_print(self.PRINT_MODE_VALUES, data, file=file)
 
