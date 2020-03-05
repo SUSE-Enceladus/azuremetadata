@@ -24,12 +24,12 @@ class AzureMetadata:
 
     def get_instance_data(self):
         return self._make_request(
-            f"http://169.254.169.254/metadata/instance?api-version={quote(self._api_version)}"
+            "http://169.254.169.254/metadata/instance?api-version={}".format(quote(self._api_version))
         )
 
     def get_attested_data(self):
         return self._make_request(
-            f"http://169.254.169.254/metadata/attested/document?api-version={quote(self._api_version)}"
+            "http://169.254.169.254/metadata/attested/document?api-version={}".format(quote(self._api_version))
         )
 
     def get_disk_tag(self, device=None):
@@ -54,14 +54,14 @@ class AzureMetadata:
         devices = glob.glob("/sys/block/*")
         for device_path in devices:
             device = os.path.basename(device_path)
-            partitions = glob.glob(f"/sys/block/{device}/{device}*")
+            partitions = glob.glob("/sys/block/{}/{}*".format(device, device))
 
             for partition in partitions:
-                with open(f"{partition}/dev", "r") as fh:
+                with open("{}/dev".format(partition), "r") as fh:
                     device_id = fh.read().strip()
 
                 if device_id == root_device_id:
-                    return f"/dev/{device}"
+                    return "/dev/{}".format(device)
 
         return None
 

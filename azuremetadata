@@ -35,7 +35,7 @@ try:
 
     util = azuremetadatautils.AzureMetadataUtils(data)
     for key in util.available_params.keys():
-        parser.add_argument(f'--{key}', nargs='?', type=int, const=True, action=PreserveArgumentOrder)
+        parser.add_argument('--{}'.format(key), nargs='?', type=int, const=True, action=PreserveArgumentOrder)
 
     args = parser.parse_args()
     ordered_args = getattr(args, 'ordered_args', [])
