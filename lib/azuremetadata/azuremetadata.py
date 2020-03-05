@@ -75,6 +75,8 @@ class AzureMetadata:
                 response = urllib.request.urlopen(req, timeout=1)
 
                 data = response.read()
+                if isinstance(data, bytes):
+                    data = data.decode('utf-8')
                 return json.loads(data)
             except urllib.error.HTTPError as e:
                 print("An error occurred when fetching metadata:", file=sys.stderr)
