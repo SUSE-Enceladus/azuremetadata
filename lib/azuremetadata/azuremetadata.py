@@ -43,7 +43,9 @@ class AzureMetadata:
             with open(device, 'rb') as fh:
                 fh.seek(65536)
                 return str(uuid.UUID(bytes_le=fh.read(16)))
-        except OSError:
+        except OSError as e:
+            print("An error occurred when reading disk tag:", file=sys.stderr)
+            print(str(e), file=sys.stderr)
             return ''
 
     @staticmethod
