@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 
 import argparse
-import urllib.error
 import sys
-import json
+import io
 from azuremetadata import azuremetadatautils, azuremetadata
 
 
@@ -27,6 +26,10 @@ parser.add_argument('-o', '--output', help="Output file path")
 parser.add_argument('-a', '--api', help="API version")
 parser.add_argument('--device', help="Device to read disk tag from (default: root device)", nargs='?')
 
+with io.StringIO() as string_io:
+    parser.print_help(string_io)
+    help_header = string_io.getvalue()
+
 try:
     metadata = azuremetadata.AzureMetadata(api_args.api)
 
@@ -41,6 +44,8 @@ try:
     ordered_args = getattr(args, 'ordered_args', [])
 
     if args.help:
+        print(help_header)
+        print("\nquery arguments:")
         util.print_help()
         exit()
 
