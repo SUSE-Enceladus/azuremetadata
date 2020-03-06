@@ -57,22 +57,8 @@ def test_print_pretty(capsys):
 
 
 def test_print_xml(capsys):
-    expected_output = dedent("""
-        <foo>
-            <bar>1</bar>
-        </foo>
-        <baz index='0'>
-            <bar>
-                <foo>2</foo>
-            </bar>
-        </baz>
-        <baz index='1'>
-            <bar>
-                <foo>3</foo>
-            </bar>
-        </baz>
-        <test>4</test>
-    """).lstrip()
+    expected_output = '<document>{"foo": {"bar": 1}, "baz": [{"bar": {"foo": 2}}, ' \
+            '{"bar": {"foo": 3}}], "test": 4}</document>\n'
 
     util = azuremetadatautils.AzureMetadataUtils(data)
     util.print_pretty(print_xml=True)
