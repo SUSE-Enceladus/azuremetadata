@@ -1,7 +1,7 @@
 DESTDIR=
 PREFIX=
 NAME=python3-azuremetadata
-dirs=lib
+dirs=lib man
 files=Makefile README.md LICENSE azuremetadata setup.py
 
 nv = $(shell rpm -q --specfile --qf '%{NAME}-%{VERSION}\n' *.spec)

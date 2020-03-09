@@ -25,7 +25,7 @@ Obsoletes:      azuremetadata < 5.0.0
 Conflicts:      regionServiceClientConfigAzure <= 0.0.4
 Conflicts:      regionServiceClientConfigSAPAzure <= 1.0.1
 Release:        0
-Summary:        Python module for collecting instance metadata from GCE
+Summary:        Python module for collecting instance metadata from Azure
 License:        GPL-3.0-or-later
 Group:          System/Management
 Url:            https://github.com/SUSE/Enceladus
@@ -46,11 +46,15 @@ python3 setup.py build
 
 %install
 python3 setup.py install --prefix=%{_prefix} --root=%{buildroot}
+install -d -m 755 %{buildroot}/%{_mandir}/man1
+install -m 644 man/man1/azuremetadata.1 %{buildroot}/%{_mandir}/man1
+gzip %{buildroot}/%{_mandir}/man1/azuremetadata.1
 
 %files
 %defattr(-,root,root,-)
 %doc README.md
 %license LICENSE
+%{_mandir}/man*/*
 %dir %{python3_sitelib}/%{upstream_name}
 %dir %{python3_sitelib}/%{upstream_name}-%{version}-py%{py3_ver}.egg-info
 %{_bindir}/*
