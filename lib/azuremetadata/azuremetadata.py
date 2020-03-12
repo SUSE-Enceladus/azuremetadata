@@ -45,13 +45,13 @@ class AzureMetadata:
                 return str(uuid.UUID(bytes_le=fh.read(16)))
         except OSError as e:
             print("An error occurred when reading disk tag:", file=sys.stderr)
-            print(str(e), file=sys.stderr)
+            print(e, file=sys.stderr)
             return ''
 
     @staticmethod
     def _find_root_device():
         hex_device_id = os.stat("/").st_dev
-        root_device_id = str(os.major(hex_device_id)) + ":" + str(os.minor(hex_device_id))
+        root_device_id = "{}:{}".format(os.major(hex_device_id), os.minor(hex_device_id))
 
         devices = glob.glob("/sys/block/*")
         for device_path in devices:
@@ -82,14 +82,15 @@ class AzureMetadata:
                 return json.loads(data)
             except urllib.error.HTTPError as e:
                 print("An error occurred when fetching metadata:", file=sys.stderr)
-                print(str(e), file=sys.stderr)
+                print(e, file=sys.stderr)
                 print(e.read(), file=sys.stderr)
                 return {}
             except OSError as e:
                 tries += 1
                 last_error = e
+                # Sleep a second before retrying again with the hope that network goes up
                 sleep(1)
 
         print("An error occurred when fetching metadata:", file=sys.stderr)
-        print(str(last_error), file=sys.stderr)
+        print(last_error, file=sys.stderr)
         return {}
