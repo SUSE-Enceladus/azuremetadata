@@ -1,3 +1,20 @@
+# Copyright (c) 2020 SUSE LLC
+#
+# This file is part of azuremetadata.
+#
+# azuremetadata is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# azuremetadata is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with azuremetadata.  If not, see <http://www.gnu.org/licenses/>.
+
 import pytest
 from textwrap import dedent
 from azuremetadata import azuremetadatautils
@@ -57,25 +74,22 @@ def test_print_pretty(capsys):
 
 
 def test_print_xml(capsys):
-    expected_output = dedent("""
-        <foo>
-            <bar>1</bar>
-        </foo>
-        <baz index='0'>
-            <bar>
-                <foo>2</foo>
-            </bar>
-        </baz>
-        <baz index='1'>
-            <bar>
-                <foo>3</foo>
-            </bar>
-        </baz>
-        <test>4</test>
-    """).lstrip()
+    expected_output = '<document>{"foo": {"bar": 1}, "baz": [{"bar": {"foo": 2}}, ' \
+            '{"bar": {"foo": 3}}], "test": 4}</document>\n'
 
     util = azuremetadatautils.AzureMetadataUtils(data)
-    util.print_pretty(True)
+    util.print_pretty(print_xml=True)
+    captured = capsys.readouterr()
+
+    assert captured.out == expected_output
+    assert captured.err == ''
+
+
+def test_print_json(capsys):
+    expected_output = """{"foo": {"bar": 1}, "baz": [{"bar": {"foo": 2}}, {"bar": {"foo": 3}}], "test": 4}\n"""
+
+    util = azuremetadatautils.AzureMetadataUtils(data)
+    util.print_pretty(print_json=True)
     captured = capsys.readouterr()
 
     assert captured.out == expected_output

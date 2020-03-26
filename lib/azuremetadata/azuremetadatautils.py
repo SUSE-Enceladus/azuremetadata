@@ -1,4 +1,22 @@
+# Copyright (c) 2020 SUSE LLC
+#
+# This file is part of azuremetadata.
+#
+# azuremetadata is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# azuremetadata is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with azuremetadata.  If not, see <http://www.gnu.org/licenses/>.
+
 import warnings
+import json
 
 
 class QueryException(Exception):
@@ -45,12 +63,14 @@ class AzureMetadataUtils:
     def print_help(self):
         self._pretty_print(self.PRINT_MODE_HELP, self._data)
 
-    def print_pretty(self, print_xml=False, data=None, file=None):
+    def print_pretty(self, print_xml=False, print_json=False, data=None, file=None):
         if not data:
             data = self._data
 
         if print_xml:
-            self._pretty_print(self.PRINT_MODE_XML, data, file=file)
+            print('<document>' + json.dumps(data) + '</document>', file=file)
+        elif print_json:
+            print(json.dumps(data), file=file)
         else:
             self._pretty_print(self.PRINT_MODE_VALUES, data, file=file)
 
@@ -62,35 +82,35 @@ class AzureMetadataUtils:
         for key, value in data.items():
             if isinstance(value, dict):
                 if print_mode == self.PRINT_MODE_HELP:
-                    print(f"{indent}--{key}", file=file)
+                    print("{}--{}".format(indent, key), file=file)
                 elif print_mode == self.PRINT_MODE_VALUES:
-                    print(f"{indent}{key}:", file=file)
+                    print("{}{}:".format(indent, key), file=file)
                 else:
-                    print(f"{indent}<{key}>", file=file)
+                    print("{}<{}>".format(indent, key), file=file)
 
                 self._pretty_print(print_mode, value, depth=depth + 1, file=file)
 
                 if print_mode == self.PRINT_MODE_XML:
-                    print(f"{indent}</{key}>", file=file)
+                    print("{}</{}>".format(indent, key), file=file)
             elif isinstance(value, list):
                 for idx, val in enumerate(value):
                     if print_mode == self.PRINT_MODE_HELP:
-                        print(f"{indent}--{key} {idx}", file=file)
+                        print("{}--{} {}".format(indent, key, idx), file=file)
                     elif print_mode == self.PRINT_MODE_VALUES:
-                        print(f"{indent}{key}[{idx}]:", file=file)
+                        print("{}{}[{}]:".format(indent, key, idx), file=file)
                     else:
-                        print(f"{indent}<{key} index='{idx}'>", file=file)
+                        print("{}<{} index='{}'>".format(indent, key, idx), file=file)
 
                     self._pretty_print(print_mode, val, depth=depth + 1, file=file)
                     if print_mode == self.PRINT_MODE_XML:
-                        print(f"{indent}</{key}>", file=file)
+                        print("{}</{}>".format(indent, key), file=file)
             else:
                 if print_mode == self.PRINT_MODE_HELP:
-                    print(f"{indent}--{key}", file=file)
+                    print("{}--{}".format(indent, key), file=file)
                 elif print_mode == self.PRINT_MODE_VALUES:
-                    print(f"{indent}{key}: {value}", file=file)
+                    print("{}{}: {}".format(indent, key, value), file=file)
                 else:
-                    print(f"{indent}<{key}>{value}</{key}>", file=file)
+                    print("{}<{}>{}</{}>".format(indent, key, value, key), file=file)
 
     def query(self, args):
         """Generates output based on command line arguments."""
@@ -104,13 +124,13 @@ class AzureMetadataUtils:
                 argval = 0
 
             if self._available_params.get(arg) is None:
-                raise QueryException(f"Nothing found for '{arg}'")
+                raise QueryException("Nothing found for '{}'".format(arg))
 
             value = root.get(arg)
 
             if root == self._available_params and len(self._parents[arg]) > 1:
                 if self._data.get(arg) is None:
-                    raise QueryException(f"Argument '{arg}' is ambiguous: possible parents {self._parents[arg]}")
+                    raise QueryException("Argument '{}' is ambiguous: possible parents {}".format(arg, self._parents[arg]))
                 else:
                     value = self._data.get(arg)
 
@@ -123,7 +143,7 @@ class AzureMetadataUtils:
                 continue
 
             if value is None:
-                raise QueryException(f"Nothing found for '{arg}'")
+                raise QueryException("Nothing found for '{}'".format(arg))
             else:
                 result.append({arg: value})
 
