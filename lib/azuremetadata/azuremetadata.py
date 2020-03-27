@@ -68,7 +68,7 @@ class AzureMetadata:
     def _find_root_device():
         """Returns detected root device path or None if detection failed."""
         proc = subprocess.Popen(
-            ["findmnt", "-f", "-n", "-o", "SOURCE", "/"],
+            ["findmnt", "--first-only", "--noheadings", "--output=SOURCE", "--nofsroot", "/"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
