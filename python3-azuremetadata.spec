@@ -31,6 +31,7 @@ Group:          System/Management
 Url:            https://github.com/SUSE/Enceladus
 Source0:        %{name}-%{version}.tar.bz2
 Requires:       python3
+Recommends:     util-linux
 BuildRequires:  python3-setuptools
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildArch:      noarch
