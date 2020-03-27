@@ -16,9 +16,8 @@
 # along with azuremetadata.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
+import subprocess
 import uuid
-import os
-import glob
 import urllib.error
 import urllib.request
 import sys
@@ -67,22 +66,18 @@ class AzureMetadata:
 
     @staticmethod
     def _find_root_device():
-        hex_device_id = os.stat("/").st_dev
-        root_device_id = "{}:{}".format(os.major(hex_device_id), os.minor(hex_device_id))
+        """Returns detected root device path or None if detection failed."""
+        proc = subprocess.Popen(
+            ["findmnt", "--first-only", "--noheadings", "--output=SOURCE", "--nofsroot", "/"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        out, err = proc.communicate()
 
-        devices = glob.glob("/sys/block/*")
-        for device_path in devices:
-            device = os.path.basename(device_path)
-            partitions = glob.glob("/sys/block/{}/{}*".format(device, device))
-
-            for partition in partitions:
-                with open("{}/dev".format(partition), "r") as fh:
-                    device_id = fh.read().strip()
-
-                if device_id == root_device_id:
-                    return "/dev/{}".format(device)
-
-        return None
+        if err or not out:
+            return None
+        else:
+            return out.decode("utf-8").strip()
 
     @staticmethod
     def _make_request(url):
