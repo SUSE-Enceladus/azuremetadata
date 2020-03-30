@@ -1,0 +1,39 @@
+{
+  "compute": {
+    "location": "westeurope",
+    "name": "ivan-test",
+    "offer": "sles-15-sp1",
+    "osType": "Linux",
+    "platformFaultDomain": "0",
+    "platformUpdateDomain": "0",
+    "publisher": "suse",
+    "sku": "gen1",
+    "version": "2019.11.13",
+    "vmId": "183baeab-a710-4184-9758-ca4491e7f1a8",
+    "vmSize": "Basic_A0"
+  },
+  "network": {
+    "interface": [
+      {
+        "ipv4": {
+          "ipAddress": [
+            {
+              "privateIpAddress": "172.16.0.4",
+              "publicIpAddress": "52.166.222.251"
+            }
+          ],
+          "subnet": [
+            {
+              "address": "172.16.0.0",
+              "prefix": "24"
+            }
+          ]
+        },
+        "ipv6": {
+          "ipAddress": []
+        },
+        "macAddress": "000D3AACB22A"
+      }
+    ]
+  }
+}

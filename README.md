@@ -1,18 +1,24 @@
 # azuremetadata
 
-## Introduction
+## Running in development
 
-azuremetadata is a command line utility to collect meta data available in a
-Microsoft Azure instance. The metadata is provided by the cloud framework
-utility WALinuxAgent as documented here (https://github.com/Azure/WALinuxAgent).
-The command line utility gets the requested information and by default
-writes the data to standard output in a json format. The data can optionally
-be represented as XML snippets or raw text
+#### Running the stub metadata server locally
 
-## Installation
+1. Run `./stub_server.py` -- it serves fixtures from `fixtures` directory on port 8888.
+2. Redirect packets for `169.254.169.254:80` to `127.0.01:8888`:
+```bash
+iptables -t nat -A OUTPUT -p tcp -d 169.254.169.254 -j DNAT --to-destination 127.0.0.1:8888
+```
 
-Use the standard make install process:
+#### Running the command-line tool
 
 ```bash
-  sudo make install
+export PYTHONPATH=./lib ./azuremetadata
+```
+
+#### Running tests
+
+```bash
+make test
+make coverage
 ```
