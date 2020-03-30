@@ -1,0 +1,63 @@
+.\" Process this file with
+.\" groff -man -Tascii azuremetadata.1
+.\"
+.TH azuremetadata.1
+
+.SH NAME
+azuremetadata \- Query Microsoft Azure metadata server
+
+.SH SYNOPSIS
+.B azuremetadata [option]
+
+.SH DESCRIPTION
+
+.B azuremetadata
+is used to query Microsoft Azure metadata server. The available
+data is documented at
+https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service .
+The tool allows to filter specific metadata fields via command line options,
+which are generated dynamically based on the data available for each API
+version.
+
+.SH STATIC OPTIONS
+
+.IP "-a --api [VERSION]"
+Specify metadata API version to be queried. By default the oldest available
+version is used (2017-04-02).
+
+.IP "-h, --help"
+Print all available command line options to standard out.
+
+.IP "-x, --xml"
+Output the result as XML.
+
+.IP "-j, --json"
+Output the result as JSON.
+
+.IP "-o , --output [OUTPUT]"
+Output file path. If not set, the output is printed to STDOUT.
+
+.IP "--device [DEVICE]"
+Path to the device to read disk tag from. If not set, disk tag will be read from
+the root device.
+
+.SH DYNAMIC OPTIONS
+Dynamic command line options are listed in
+.IR --help
+output. An API version can
+be specified, the produced dynamic options list will be specific to that API
+version.
+
+.SH EXAMPLES
+
+.IP "Set the API version"
+azuremetadata --api 2019-08-15
+
+.IP "Get instance name"
+azuremetadata --compute --name
+
+.IP "Get public IP of a second network interface"
+azuremetadata --network --interface=1 --ipv4 --ipAddress --publicIpAddress
+
+.SH AUTHOR
+Ivan Kapelyukhin (ikapelyukhin@suse.com)
