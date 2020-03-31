@@ -28,7 +28,7 @@ Release:        0
 Summary:        Python module for collecting instance metadata from Azure
 License:        GPL-3.0-or-later
 Group:          System/Management
-Url:            https://github.com/SUSE/Enceladus
+Url:            https://github.com/SUSE-Enceladus/azuremetadata
 Source0:        %{name}-%{version}.tar.bz2
 Requires:       python3
 Recommends:     util-linux
