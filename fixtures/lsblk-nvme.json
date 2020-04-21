@@ -1,0 +1,11 @@
+{
+   "blockdevices": [
+      {"name":"nvme0n1", "maj:min":"259:0", "rm":false, "size":"10G", "ro":false, "type":"disk", "mountpoint":null,
+         "children": [
+            {"name":"nvme0n1p1", "maj:min":"259:1", "rm":false, "size":"2M", "ro":false, "type":"part", "mountpoint":null},
+            {"name":"nvme0n1p2", "maj:min":"259:2", "rm":false, "size":"20M", "ro":false, "type":"part", "mountpoint":"/boot/efi"},
+            {"name":"nvme0n1p3", "maj:min":"259:3", "rm":false, "size":"10G", "ro":false, "type":"part", "mountpoint":"/"}
+         ]
+      }
+   ]
+}

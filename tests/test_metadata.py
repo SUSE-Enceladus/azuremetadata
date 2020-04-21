@@ -17,6 +17,7 @@
 
 from azuremetadata import azuremetadata
 from mock import patch
+import pytest
 import json
 
 
@@ -89,3 +90,21 @@ def test_get_attested_data(request_mock, urlopen_mock):
         headers={'Metadata': 'true'}
     )
     assert data == expected_data
+
+@patch('azuremetadata.azuremetadata.AzureMetadata._get_lsblk_output')
+@pytest.mark.parametrize(
+    "fixture_file_name,mountpoint,expected_device_name",
+    [
+        ('lsblk.json', '/', '/dev/sda'),
+        ('lsblk-lvm.json', '/', '/dev/sda'),
+        ('lsblk-lvm.json', '/home', '/dev/sda'),
+        ('lsblk-nvme.json', '/', '/dev/nvme0n1'),
+    ]
+)
+def test_find_block_device(lsblk_mock, fixture_file_name, mountpoint, expected_device_name):
+    with open(str.format('./fixtures/{}', fixture_file_name), 'rb') as file:
+        fixture = file.read()
+    lsblk_mock.return_value = (fixture, None)
+    device = azuremetadata.AzureMetadata._find_block_device(mountpoint)
+
+    assert device == expected_device_name
