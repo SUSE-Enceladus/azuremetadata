@@ -50,7 +50,7 @@ class AzureMetadata:
 
     def get_disk_tag(self, device=None):
         if not device:
-            device = self._find_root_device()
+            device = self._find_block_device()
 
         if not device:
             return ''
@@ -65,19 +65,46 @@ class AzureMetadata:
             return ''
 
     @staticmethod
-    def _find_root_device():
+    def _find_block_device(mountpoint="/"):
         """Returns detected root device path or None if detection failed."""
+
+        out, err = AzureMetadata._get_lsblk_output()
+
+        if err or not out:
+            return None
+        else:
+            try:
+                data = json.loads(out.decode("utf-8"))
+            except json.decoder.JSONDecodeError:
+                return None
+
+            for blockdevice in data.get("blockdevices", []):
+                if AzureMetadata._blockdevice_has_mountpoint(blockdevice, mountpoint):
+                    return str.format("/dev/{}", blockdevice["name"])
+
+            return None
+
+    @staticmethod
+    def _get_lsblk_output():
         proc = subprocess.Popen(
-            ["findmnt", "--first-only", "--noheadings", "--output=SOURCE", "--nofsroot", "/"],
+            ["lsblk", "--json"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
         out, err = proc.communicate()
 
-        if err or not out:
-            return None
-        else:
-            return out.decode("utf-8").strip()
+        return out, err
+
+    @staticmethod
+    def _blockdevice_has_mountpoint(item, mountpoint):
+        for child in item.get("children", []):
+            if child["mountpoint"] == mountpoint:
+                return True
+
+            if AzureMetadata._blockdevice_has_mountpoint(child, mountpoint):
+                return True
+
+        return False
 
     @staticmethod
     def _make_request(url):
