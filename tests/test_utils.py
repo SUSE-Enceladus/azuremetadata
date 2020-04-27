@@ -142,7 +142,7 @@ def test_query_unique():
 
     result = util.query(args)
 
-    assert result == [{'test': 4}]
+    assert result == {'test': 4}
 
 
 def test_query_root_parent():
@@ -151,7 +151,7 @@ def test_query_root_parent():
 
     result = util.query(args)
 
-    assert result == [{'bar': 1}]
+    assert result == {'foo': {'bar': 1}}
 
 
 def test_query_list_index():
@@ -160,7 +160,7 @@ def test_query_list_index():
 
     result = util.query(args)
 
-    assert result == [{'foo': 3}]
+    assert result == {'baz': { 'bar': {'foo': 3}}}
 
 
 def test_available_params():

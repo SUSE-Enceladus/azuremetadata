@@ -58,8 +58,7 @@ try:
             util.print_pretty(print_xml=args.xml, print_json=args.json, file=fh)
         else:
             result = util.query(ordered_args)
-            for item in result:
-                util.print_pretty(print_xml=args.xml, print_json=args.json, data=item, file=fh)
+            util.print_pretty(print_xml=args.xml, print_json=args.json, data=result, file=fh)
     finally:
         if fh:
             fh.close()

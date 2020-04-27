@@ -115,7 +115,8 @@ class AzureMetadataUtils:
     def query(self, args):
         """Generates output based on command line arguments."""
         root = self._available_params
-        result = []
+        result = {}
+        parents = []
 
         while len(args) > 0:
             arg, argval = args.pop(0)
@@ -136,18 +137,26 @@ class AzureMetadataUtils:
 
             if isinstance(value, list):
                 root = value[argval]
+                parents.append(arg)
                 continue
 
             if isinstance(value, dict):
                 root = value
+                parents.append(arg)
                 continue
 
             if value is None:
                 raise QueryException("Nothing found for '{}'".format(arg))
             else:
-                result.append({arg: value})
+                target = result
+                for item in parents:
+                    target[item] = {}
+                    target = target[item]
+
+                target[arg] = value
 
             root = self._available_params
+            parents = []
 
         if root != self._available_params:
             raise QueryException("Unfinished query")
