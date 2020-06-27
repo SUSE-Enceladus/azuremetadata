@@ -19,6 +19,7 @@ from azuremetadata import azuremetadata
 from mock import patch
 import pytest
 import json
+import urllib
 
 
 def test_get_disk_tag():
@@ -108,3 +109,29 @@ def test_find_block_device(lsblk_mock, fixture_file_name, mountpoint, expected_d
     device = azuremetadata.AzureMetadata._find_block_device(mountpoint)
 
     assert device == expected_device_name
+
+
+@patch('sys.stderr')
+@patch('urllib.request.urlopen')
+@patch('urllib.request.Request')
+def test_get_latest_api_version(request_mock, urlopen_mock,
+                                stderr_mock):
+    output = {"newest-versions": ["bar"]}
+    stderr_mock.read.return_value = json.dumps(output).encode('utf-8')
+    http_err = urllib.error.HTTPError(
+        None, 400, 'Bad Request', 'error', stderr_mock
+    )
+    request_mock.side_effect = http_err
+
+    assert azuremetadata.AzureMetadata._get_api('latest') == 'bar'
+    request_mock.assert_called_with(
+        'http://169.254.169.254/metadata/instance',
+        headers={'Metadata': 'true'}
+    )
+
+    stderr_mock.read.return_value = b'{"error": "foo"}'
+    http_err = urllib.error.HTTPError(
+        None, 400, 'Bad Request', 'error', stderr_mock
+    )
+    request_mock.side_effect = http_err
+    assert azuremetadata.AzureMetadata._get_api('latest') == '2017-04-02'

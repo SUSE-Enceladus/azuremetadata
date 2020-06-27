@@ -27,7 +27,7 @@ from urllib.parse import quote
 
 class AzureMetadata:
     def __init__(self, api_version=None):
-        self._api_version = api_version if api_version else '2017-04-02'
+        self._api_version = self._get_api(api_version) if api_version else '2017-04-02'
 
     def get_all(self):
         result = self.get_instance_data()
@@ -107,19 +107,25 @@ class AzureMetadata:
         return False
 
     @staticmethod
-    def _make_request(url):
+    def _make_request(url, no_api=False):
         tries = 0
         last_error = None
         while tries < 5:
             try:
                 req = urllib.request.Request(url, headers={'Metadata': 'true'})
-                response = urllib.request.urlopen(req, timeout=1)
+                response = urllib.request.urlopen(req, timeout=2)
 
                 data = response.read()
                 if isinstance(data, bytes):
                     data = data.decode('utf-8')
                 return json.loads(data)
             except urllib.error.HTTPError as e:
+                if no_api:
+                    err = e.read()
+                    if isinstance(err, bytes):
+                        err = err.decode('utf-8')
+                    if 'newest-versions' in err:
+                        return err
                 print("An error occurred when fetching metadata:", file=sys.stderr)
                 print(e, file=sys.stderr)
                 print(e.read(), file=sys.stderr)
@@ -133,3 +139,23 @@ class AzureMetadata:
         print("An error occurred when fetching metadata:", file=sys.stderr)
         print(last_error, file=sys.stderr)
         return {}
+
+    @staticmethod
+    def _get_api(api_version):
+        if api_version == 'latest':
+            api_newest_versions = AzureMetadata._get_api_newest_versions()
+            api_version = api_newest_versions[0]
+        return api_version
+
+    @staticmethod
+    def _get_api_newest_versions():
+        newest_api = ['2017-04-02']
+        # When no API version is specified,
+        # the response includes a list of the newest supported versions.
+        no_api_version_result = AzureMetadata._make_request(
+            "http://169.254.169.254/metadata/instance", True
+        )
+        if no_api_version_result:
+            data = json.loads(no_api_version_result)
+            newest_api = data['newest-versions']
+        return newest_api
