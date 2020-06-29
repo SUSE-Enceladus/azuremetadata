@@ -73,6 +73,32 @@ def test_print_pretty(capsys):
     assert captured.err == ''
 
 
+def test_pretty_print(capsys):
+    expected_output = dedent("""
+    <foo>
+        <bar>1</bar>
+    </foo>
+    <baz index='0'>
+        <bar>
+            <foo>2</foo>
+        </bar>
+    </baz>
+    <baz index='1'>
+        <bar>
+            <foo>3</foo>
+        </bar>
+    </baz>
+    <test>4</test>
+    """).lstrip()
+
+    util = azuremetadatautils.AzureMetadataUtils(data)
+    util._pretty_print(print_mode=3, data=data)
+    captured = capsys.readouterr()
+
+    assert captured.out == expected_output
+    assert captured.err == ''
+
+
 def test_print_xml(capsys):
     expected_output = '<document>{"foo": {"bar": 1}, "baz": [{"bar": {"foo": 2}}, ' \
             '{"bar": {"foo": 3}}], "test": 4}</document>\n'
