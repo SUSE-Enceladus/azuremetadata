@@ -23,7 +23,7 @@ parser.add_argument('-h', '--help', action="store_true", help="Display help")
 parser.add_argument('-x', '--xml', action="store_true", help="Output as XML")
 parser.add_argument('-j', '--json', action="store_true", help="Output as JSON")
 parser.add_argument('-o', '--output', help="Output file path")
-parser.add_argument('-a', '--api', help="API version")
+parser.add_argument('-a', '--api', help="API version or 'latest' for newest API version")
 parser.add_argument('--device', help="Device to read disk tag from (default: root device)", nargs='?')
 
 with io.StringIO() as string_io:
