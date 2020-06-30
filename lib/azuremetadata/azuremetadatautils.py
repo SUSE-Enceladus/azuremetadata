@@ -63,7 +63,10 @@ class AzureMetadataUtils:
     def print_help(self):
         self._pretty_print(self.PRINT_MODE_HELP, self._data)
 
-    def print_pretty(self, print_xml=False, print_json=False, data=None, file=None):
+    def print_pretty(
+            self, print_xml=False, print_json=False,
+            data=None, file=None
+    ):
         if not data:
             data = self._data
 
@@ -75,8 +78,7 @@ class AzureMetadataUtils:
             self._pretty_print(self.PRINT_MODE_VALUES, data, file=file)
 
     def _pretty_print(self, print_mode, data, depth=0, file=None):
-        """Prints all available options as an indented tree."""
-
+        """Print all available options as an indented tree."""
         indent = ' ' * depth * 4
 
         for key, value in data.items():
@@ -88,7 +90,9 @@ class AzureMetadataUtils:
                 else:
                     print("{}<{}>".format(indent, key), file=file)
 
-                self._pretty_print(print_mode, value, depth=depth + 1, file=file)
+                self._pretty_print(
+                    print_mode, value, depth=depth + 1, file=file
+                )
 
                 if print_mode == self.PRINT_MODE_XML:
                     print("{}</{}>".format(indent, key), file=file)
@@ -99,21 +103,25 @@ class AzureMetadataUtils:
                     elif print_mode == self.PRINT_MODE_VALUES:
                         print("{}{}[{}]:".format(indent, key, idx), file=file)
                     else:
-                        print("{}<{} index='{}'>".format(indent, key, idx), file=file)
+                        print("{}<{} index='{}'>".format(indent, key, idx),
+                              file=file)
 
-                    self._pretty_print(print_mode, val, depth=depth + 1, file=file)
+                    self._pretty_print(
+                        print_mode, val, depth=depth + 1, file=file)
                     if print_mode == self.PRINT_MODE_XML:
-                        print("{}</{}>".format(indent, key), file=file)
+                        print("{}</{}>".format(indent, key),
+                              file=file)
             else:
                 if print_mode == self.PRINT_MODE_HELP:
                     print("{}--{}".format(indent, key), file=file)
                 elif print_mode == self.PRINT_MODE_VALUES:
                     print("{}{}: {}".format(indent, key, value), file=file)
                 else:
-                    print("{}<{}>{}</{}>".format(indent, key, value, key), file=file)
+                    print("{}<{}>{}</{}>".format(indent, key, value, key),
+                          file=file)
 
     def query(self, args):
-        """Generates output based on command line arguments."""
+        """Generate output based on command line arguments."""
         root = self._available_params
         result = {}
         parents = []
@@ -131,7 +139,10 @@ class AzureMetadataUtils:
 
             if root == self._available_params and len(self._parents[arg]) > 1:
                 if self._data.get(arg) is None:
-                    raise QueryException("Argument '{}' is ambiguous: possible parents {}".format(arg, self._parents[arg]))
+                    raise QueryException(
+                        "Argument '{}' is ambiguous: possible parents {}"
+                        .format(arg, self._parents[arg])
+                    )
                 else:
                     value = self._data.get(arg)
 
