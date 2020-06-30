@@ -15,7 +15,7 @@ test:
 	PYTHONPATH=./lib pytest
 
 coverage:
-	PYTHONPATH=./lib pytest --cov-report html --cov=lib/
+	PYTHONPATH=./lib pytest --cov-report html --cov=lib/ --cov-report term-missing
 
 tar:
 	mkdir "$(NAME)-$(verSrc)"
