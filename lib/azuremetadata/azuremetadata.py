@@ -74,6 +74,11 @@ class AzureMetadata:
             print(e, file=sys.stderr)
             return ''
 
+    def show_api_versions(self):
+        data = self._get_api_newest_versions()
+        result = {i: data[i] for i in range(0, len(data))}
+        return result
+
     @staticmethod
     def _find_block_device(mountpoint="/"):
         """Return detected root device path or None if detection failed."""

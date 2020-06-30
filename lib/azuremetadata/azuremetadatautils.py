@@ -27,6 +27,7 @@ class AzureMetadataUtils:
     PRINT_MODE_HELP = 1
     PRINT_MODE_VALUES = 2
     PRINT_MODE_XML = 3
+    PRINT_MODE_APIS = 4
 
     def __init__(self, data):
         self._data = data
@@ -62,6 +63,9 @@ class AzureMetadataUtils:
 
     def print_help(self):
         self._pretty_print(self.PRINT_MODE_HELP, self._data)
+
+    def print_api_versions(self):
+        self._pretty_print(self.PRINT_MODE_APIS, self._data, 1)
 
     def print_pretty(
             self, print_xml=False, print_json=False,
@@ -116,6 +120,8 @@ class AzureMetadataUtils:
                     print("{}--{}".format(indent, key), file=file)
                 elif print_mode == self.PRINT_MODE_VALUES:
                     print("{}{}: {}".format(indent, key, value), file=file)
+                elif print_mode == self.PRINT_MODE_APIS:
+                    print("{}{}".format(indent, value), file=file)
                 else:
                     print("{}<{}>{}</{}>".format(indent, key, value, key),
                           file=file)

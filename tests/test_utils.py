@@ -214,3 +214,16 @@ def test_invalid_data():
 
     assert str(w[0].message) == "Only list of dicts is supported"
     assert util.available_params == {'bar': 1, 'foo': {'bar': 1}}
+
+
+def test_show_api_versions(capsys):
+    expected_output = "    foo\n    bar\n"
+
+    data = {'0': 'foo', '1': 'bar'}
+
+    util = azuremetadatautils.AzureMetadataUtils(data)
+    util.print_api_versions()
+    captured = capsys.readouterr()
+
+    assert captured.out == expected_output
+    assert captured.err == ''
