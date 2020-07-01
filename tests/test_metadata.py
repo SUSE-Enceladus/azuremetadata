@@ -253,4 +253,4 @@ def test_show_api_versions(newest_api_mock):
     newest_api_mock.return_value = ['foo', 'bar']
 
     metadata = azuremetadata.AzureMetadata()
-    assert metadata.show_api_versions() == {0: 'foo', 1: 'bar'}
+    assert metadata.show_api_versions() == ['foo', 'bar']

@@ -75,9 +75,10 @@ class AzureMetadata:
             return ''
 
     def show_api_versions(self):
-        data = self._get_api_newest_versions()
-        result = {i: data[i] for i in range(0, len(data))}
-        return result
+        # currently, there is no other way to query
+        # for API versions, so the newest ones are
+        # considered all available APIs
+        return self._get_api_newest_versions()
 
     @staticmethod
     def _find_block_device(mountpoint="/"):

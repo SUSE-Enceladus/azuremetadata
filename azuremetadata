@@ -28,8 +28,8 @@ parser.add_argument('-a', '--api',
 parser.add_argument('--device',
                     help="Device to read disk tag from (default: root device)",
                     nargs='?')
-parser.add_argument('--show-apis', action="store_true",
-                    help="Show available API versions")
+parser.add_argument('--listapis', action="store_true",
+                    help="List available API versions")
 
 with io.StringIO() as string_io:
     parser.print_help(string_io)
@@ -55,10 +55,10 @@ try:
         exit()
 
     if args.show_apis:
-        data = metadata.show_api_versions()
-        util = azuremetadatautils.AzureMetadataUtils(data)
+        api_versions = metadata.show_api_versions()
         print('Available API versions:')
-        util.print_api_versions()
+        for api in api_versions:
+            print('    {}'.format(api))
         exit()
 
     fh = None
