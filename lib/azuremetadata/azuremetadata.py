@@ -74,7 +74,7 @@ class AzureMetadata:
             print(e, file=sys.stderr)
             return ''
 
-    def show_api_versions(self):
+    def list_api_versions(self):
         # currently, there is no other way to query
         # for API versions, so the newest ones are
         # considered all available APIs

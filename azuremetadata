@@ -54,8 +54,8 @@ try:
         util.print_help()
         exit()
 
-    if args.show_apis:
-        api_versions = metadata.show_api_versions()
+    if args.listapis:
+        api_versions = metadata.list_api_versions()
         print('Available API versions:')
         for api in api_versions:
             print('    {}'.format(api))
