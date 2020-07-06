@@ -3,6 +3,7 @@
 import argparse
 import sys
 import io
+import random
 from azuremetadata import azuremetadatautils, azuremetadata
 
 
@@ -42,6 +43,15 @@ try:
     data['billingTag'] = metadata.get_disk_tag(api_args.device)
 
     util = azuremetadatautils.AzureMetadataUtils(data)
+
+    # generate subscriptionId if it's unavailable and called with arguments used by cloud-regionsrv-client
+    if (
+        'subscriptionId' not in util.available_params and
+        util.get_regionsrv_client_data_provider() == " ".join(sys.argv)
+    ):
+        data['subscriptionId'] = "classic-{}".format(random.randint(0, 1e9))
+        util = azuremetadatautils.AzureMetadataUtils(data)
+
     for key in util.available_params.keys():
         parser.add_argument('--{}'.format(key), nargs='?', type=int, const=True, action=PreserveArgumentOrder)
 
