@@ -26,13 +26,21 @@ from urllib.parse import quote
 
 
 class AzureMetadata:
+    """Class for querying Azure instance metadata."""
+
     def __init__(self, api_version=None):
         self._api_version = self._get_api(api_version) if api_version else '2017-04-02'
 
     def get_all(self):
+        """Return all metadata.
+
+        Return instance metadata and, if attested data is available in
+        api version, attested data.
+        """
         result = self.get_instance_data()
 
-        # 2018-10-01 seems to be the earliest version when attested metadata is available
+        # 2018-10-01 seems to be the earliest version
+        # when attested metadata is available
         if self._api_version >= '2018-10-01':
             result['attestedData'] = self.get_attested_data()
 
@@ -40,12 +48,14 @@ class AzureMetadata:
 
     def get_instance_data(self):
         return self._make_request(
-            "http://169.254.169.254/metadata/instance?api-version={}".format(quote(self._api_version))
+            "http://169.254.169.254/metadata/instance?api-version={}"
+            .format(quote(self._api_version))
         )
 
     def get_attested_data(self):
         return self._make_request(
-            "http://169.254.169.254/metadata/attested/document?api-version={}".format(quote(self._api_version))
+            "http://169.254.169.254/metadata/attested/document?api-version={}"
+            .format(quote(self._api_version))
         )
 
     def get_disk_tag(self, device=None):
@@ -64,10 +74,15 @@ class AzureMetadata:
             print(e, file=sys.stderr)
             return ''
 
+    def list_api_versions(self):
+        # currently, there is no other way to query
+        # for API versions, so the newest ones are
+        # considered all available APIs
+        return self._get_api_newest_versions()
+
     @staticmethod
     def _find_block_device(mountpoint="/"):
-        """Returns detected root device path or None if detection failed."""
-
+        """Return detected root device path or None if detection failed."""
         out, err = AzureMetadata._get_lsblk_output()
 
         if err or not out:
@@ -79,7 +94,9 @@ class AzureMetadata:
                 return None
 
             for blockdevice in data.get("blockdevices", []):
-                if AzureMetadata._blockdevice_has_mountpoint(blockdevice, mountpoint):
+                if AzureMetadata._blockdevice_has_mountpoint(
+                        blockdevice, mountpoint
+                ):
                     return str.format("/dev/{}", blockdevice["name"])
 
             return None
@@ -126,14 +143,16 @@ class AzureMetadata:
                         err = err.decode('utf-8')
                     if 'newest-versions' in err:
                         return err
-                print("An error occurred when fetching metadata:", file=sys.stderr)
+                print("An error occurred when fetching metadata:",
+                      file=sys.stderr)
                 print(e, file=sys.stderr)
                 print(e.read(), file=sys.stderr)
                 return {}
             except OSError as e:
                 tries += 1
                 last_error = e
-                # Sleep a second before retrying again with the hope that network goes up
+                # Sleep a second before retrying again with
+                # the hope that network goes up
                 sleep(1)
 
         print("An error occurred when fetching metadata:", file=sys.stderr)

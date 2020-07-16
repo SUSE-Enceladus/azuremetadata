@@ -246,3 +246,11 @@ def test_get_all(request_mock, urlopen_mock):
     )
     assert data['attestedData'] == expected_data
     assert data['foo'] == 'bar'
+
+
+@patch('azuremetadata.azuremetadata.AzureMetadata._get_api_newest_versions')
+def test_show_api_versions(newest_api_mock):
+    newest_api_mock.return_value = ['foo', 'bar']
+
+    metadata = azuremetadata.AzureMetadata()
+    assert metadata.list_api_versions() == ['foo', 'bar']
