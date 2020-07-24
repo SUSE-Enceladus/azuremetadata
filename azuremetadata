@@ -44,17 +44,32 @@ try:
 
     util = azuremetadatautils.AzureMetadataUtils(data)
 
-    # generate subscriptionId if it's unavailable and called with arguments used by cloud-regionsrv-client
+    # Metadata API on ASM and Azure Classic instances does not produce some of the data
+    # required for registration to Public Cloud update infrastructure.
+    # If the metadata utility was called with arguments used by cloud-regionsrv-client,
+    # we have to ensure that those parameters are defined and not raising QueryException errors.
     if (
-        'subscriptionId' not in util.available_params and
         util.get_regionsrv_client_data_provider() == " ".join(sys.argv)
     ):
-        if len(util.available_params) > 1:
-            # if API response succeeded, but now subscriptionId is defined -- generate random ID
-            data['subscriptionId'] = 'classic-{}'.format(random.randint(0, 1e9))
-        else:
-            # if API was unreachable -- set subscriptionId to an empty string
-            data['subscriptionId'] = ''
+        # generate subscriptionId if it's unavailable
+        if 'subscriptionId' not in util.available_params:
+            if len(util.available_params) > 1:
+                # if API response succeeded, but no subscriptionId is defined -- generate random ID
+                data['subscriptionId'] = 'classic-{}'.format(random.randint(0, 1e9))
+            else:
+                # if API was unreachable -- set subscriptionId to an empty string
+                data['subscriptionId'] = ''
+
+        # ensuring that --attestedData --signature and --signature are available
+        if not util.available_params.get('attestedData', None):
+            data['attestedData'] = {}
+
+        if not util.available_params.get('attestedData', {}).get('signature', None):
+            data['attestedData']['signature'] = ''
+
+        if not util.available_params.get('signature', None):
+            data['signature'] = ''
+
         util = azuremetadatautils.AzureMetadataUtils(data)
 
     for key in util.available_params.keys():
