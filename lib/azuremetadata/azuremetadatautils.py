@@ -17,6 +17,8 @@
 
 import warnings
 import json
+import configparser
+import os.path
 
 
 class QueryException(Exception):
@@ -27,6 +29,8 @@ class AzureMetadataUtils:
     PRINT_MODE_HELP = 1
     PRINT_MODE_VALUES = 2
     PRINT_MODE_XML = 3
+
+    FILE_REGIONSRV_CLIENT_CONFIG = '/etc/regionserverclnt.cfg'
 
     def __init__(self, data):
         self._data = data
@@ -173,3 +177,15 @@ class AzureMetadataUtils:
             raise QueryException("Unfinished query")
 
         return result
+
+
+    @staticmethod
+    def get_regionsrv_client_data_provider():
+        if not os.path.isfile(AzureMetadataUtils.FILE_REGIONSRV_CLIENT_CONFIG):
+            return
+
+        config = configparser.ConfigParser()
+        config.read(AzureMetadataUtils.FILE_REGIONSRV_CLIENT_CONFIG)
+
+        if 'instance' in config:
+            return str(config['instance']['dataProvider']).strip()
