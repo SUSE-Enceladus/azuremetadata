@@ -44,7 +44,7 @@ try:
 
     util = azuremetadatautils.AzureMetadataUtils(data)
 
-    # Metadata API on ASM and Azure Classic instances does not produce some of the data
+    # Metadata API on ASM (Azure Classic) instances does not produce some of the data
     # required for registration to Public Cloud update infrastructure.
     # If the metadata utility was called with arguments used by cloud-regionsrv-client,
     # we have to ensure that those parameters are defined and not raising QueryException errors.
