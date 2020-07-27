@@ -80,6 +80,12 @@ class AzureMetadata:
         # considered all available APIs
         return self._get_api_newest_versions()
 
+    def set_api_version(self, api_version):
+        """Set the API version to use for queries"""
+        if not api_version:
+            return
+        self._api_version = api_version
+
     @staticmethod
     def _find_block_device(mountpoint="/"):
         """Return detected root device path or None if detection failed."""

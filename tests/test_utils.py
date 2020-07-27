@@ -215,38 +215,3 @@ def test_invalid_data():
 
     assert str(w[0].message) == "Only list of dicts is supported"
     assert util.available_params == {'bar': 1, 'foo': {'bar': 1}}
-
-
-@patch('os.path.isfile')
-def test_data_provider_no_config_file(file_mock):
-    file_mock.return_value = False
-    data_provider = azuremetadatautils.AzureMetadataUtils.get_regionsrv_client_data_provider()
-    assert data_provider is None
-
-@patch('configparser.ConfigParser')
-@patch('os.path.isfile')
-def test_data_provider_no_section(file_mock, config_mock):
-    file_mock.return_value = True
-    config_mock.return_value.read.return_value = True
-
-    config_mock.return_value.__contains__.return_value = False
-
-    data_provider = azuremetadatautils.AzureMetadataUtils.get_regionsrv_client_data_provider()
-
-    assert data_provider is None
-
-@patch('configparser.ConfigParser')
-@patch('os.path.isfile')
-def test_data_provider_with_config(file_mock, config_mock):
-    file_mock.return_value = True
-    config_mock.return_value.read.return_value = True
-
-    config_mock.return_value.__contains__.side_effect = lambda x: \
-        True if x == 'instance' else False
-
-    config_mock.return_value.__getitem__.side_effect = lambda x: \
-        {'dataProvider': '/usr/bin/testmetadata'} if x == 'instance' else None
-
-    data_provider = azuremetadatautils.AzureMetadataUtils.get_regionsrv_client_data_provider()
-
-    assert data_provider == '/usr/bin/testmetadata'
