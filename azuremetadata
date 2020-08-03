@@ -1,9 +1,13 @@
 #!/usr/bin/python3
 
 import argparse
-import sys
 import io
+import os
 import random
+import sys
+import urllib.error
+import urllib.request
+
 from azuremetadata import azuremetadatautils, azuremetadata
 
 
@@ -26,9 +30,13 @@ parser.add_argument('-j', '--json', action="store_true", help="Output as JSON")
 parser.add_argument('-o', '--output', help="Output file path")
 parser.add_argument('-a', '--api',
                     help="API version or 'latest' for newest API version")
-parser.add_argument('--device',
-                    help="Device to read disk tag from (default: root device)",
-                    nargs='?')
+# Only root can read the tag, thus hide the argument
+if os.geteuid() == 0:
+    help_msg = "Device to read disk tag from (default: root device)"
+    parser.add_argument('--device',
+                        help=help_msg,
+                        nargs='?'
+    )
 parser.add_argument('--listapis', action="store_true",
                     help="List available API versions")
 
@@ -38,42 +46,63 @@ with io.StringIO() as string_io:
 
 try:
     metadata = azuremetadata.AzureMetadata(api_args.api)
+    data = {}
+    # Handle instances in ASM, aka Classic
+    # Heuristic data: When requesting attestedData in ASM it triggers an
+    # internal server error, that's the best thing we have to go on to
+    # figure out whether or not we are in ASM.
+    # ASM gets retired in 2023, rip this code out, it's ugly!
+    attested_data_url = 'http://169.254.169.254/metadata/attested/document'
+    req = urllib.request.Request(
+        '%s?api-version=2019-11-01' % attested_data_url,
+        headers={'Metadata': 'true'}
+    )
+    try:
+        response = urllib.request.urlopen(req, timeout=2)
+    except urllib.error.HTTPError as e:
+        if e.getcode() == 500:
+            # Set the api version to the first implementation, it works in ASM
+            metadata.set_api_version('2017-04-02')
+            # Special code for SUSE, ugh becasue we know what we are
+            # looking for there is unfortunately no better way.
+            kvp_pool_file_path = '/var/lib/hyperv/.kvp_pool_3'
+            if os.path.exists(kvp_pool_file_path):
+                kvp_key_size = 512
+                kvp_value_size = 2048
+                with open(kvp_pool_file_path, 'rb') as kvp_pool_3:
+                    while True:
+                        key = kvp_pool_3.read(kvp_key_size)
+                        value = kvp_pool_3.read(kvp_value_size)
+                        if key and value:
+                            if key.split(b"\x00")[0] == b'VirtualMachineId':
+                                vm_id = value.split(b"\x00")[0]
+                                data['subscriptionId'] = 'classic-{}'.format(
+                                    vm_id.lower().decode('utf-8')
+                                )
+                                break
+            else:
+                data['subscriptionId'] = 'classic-{}'.format(
+                    random.randint(0, 1e9)
+            )
+            # ensuring that --attestedData --signature and
+            # --signature are available
+            data['attestedData'] = {}
+            data['attestedData']['signature'] = ''
+            data['signature'] = ''
+    # End code removal in 2023
+    
+    # Only root can read the tag only add the value if we are root
+    if os.geteuid() == 0:
+        data['billingTag'] = metadata.get_disk_tag(api_args.device)
 
-    data = metadata.get_all()
-    data['billingTag'] = metadata.get_disk_tag(api_args.device)
-
+    data.update(metadata.get_all())
     util = azuremetadatautils.AzureMetadataUtils(data)
 
-    # Metadata API on ASM (Azure Classic) instances does not produce some of the data
-    # required for registration to Public Cloud update infrastructure.
-    # If the metadata utility was called with arguments used by cloud-regionsrv-client,
-    # we have to ensure that those parameters are defined and not raising QueryException errors.
-    if (
-        util.get_regionsrv_client_data_provider() == " ".join(sys.argv)
-    ):
-        # generate subscriptionId if it's unavailable
-        if 'subscriptionId' not in util.available_params:
-            if len(util.available_params) > 1:
-                # if API response succeeded, but no subscriptionId is defined -- generate random ID
-                data['subscriptionId'] = 'classic-{}'.format(random.randint(0, 1e9))
-            else:
-                # if API was unreachable -- set subscriptionId to an empty string
-                data['subscriptionId'] = ''
-
-        # ensuring that --attestedData --signature and --signature are available
-        if not util.available_params.get('attestedData', None):
-            data['attestedData'] = {}
-
-        if not util.available_params.get('attestedData', {}).get('signature', None):
-            data['attestedData']['signature'] = ''
-
-        if not util.available_params.get('signature', None):
-            data['signature'] = ''
-
-        util = azuremetadatautils.AzureMetadataUtils(data)
-
     for key in util.available_params.keys():
-        parser.add_argument('--{}'.format(key), nargs='?', type=int, const=True, action=PreserveArgumentOrder)
+        parser.add_argument(
+            '--{}'.format(key), nargs='?', type=int, const=True,
+            action=PreserveArgumentOrder
+        )
 
     args = parser.parse_args()
     ordered_args = getattr(args, 'ordered_args', [])
@@ -97,10 +126,14 @@ try:
 
     try:
         if not len(ordered_args):
-            util.print_pretty(print_xml=args.xml, print_json=args.json, file=fh)
+            util.print_pretty(
+                print_xml=args.xml, print_json=args.json, file=fh
+            )
         else:
             result = util.query(ordered_args)
-            util.print_pretty(print_xml=args.xml, print_json=args.json, data=result, file=fh)
+            util.print_pretty(
+                print_xml=args.xml, print_json=args.json, data=result, file=fh
+            )
     finally:
         if fh:
             fh.close()
