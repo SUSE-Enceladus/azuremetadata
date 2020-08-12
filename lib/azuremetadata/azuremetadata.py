@@ -29,7 +29,7 @@ class AzureMetadata:
     """Class for querying Azure instance metadata."""
 
     def __init__(self, api_version=None):
-        self._api_version = self._get_api(api_version) if api_version else '2017-04-02'
+        self.set_api_version(api_version)
 
     def get_all(self):
         """Return all metadata.
@@ -83,8 +83,9 @@ class AzureMetadata:
     def set_api_version(self, api_version):
         """Set the API version to use for queries"""
         if not api_version:
-            return
-        self._api_version = api_version
+            self._api_version = '2017-04-02'
+        else:
+            self._api_version = self._get_api(api_version)
 
     @staticmethod
     def _find_block_device(mountpoint="/"):
@@ -167,6 +168,7 @@ class AzureMetadata:
 
     @staticmethod
     def _get_api(api_version):
+        """Return the latest API version available if 'latest' provided or api_version."""
         if api_version == 'latest':
             api_newest_versions = AzureMetadata._get_api_newest_versions()
             api_version = api_newest_versions[0]
