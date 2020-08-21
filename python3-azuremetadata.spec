@@ -20,7 +20,7 @@
 Name:           python3-azuremetadata
 Version:        5.1.2
 # Packaged renamed in SLE15
-Provides:       azuremetadata
+Provides:       azuremetadata = %{version}
 Obsoletes:      azuremetadata < 5.0.0
 Conflicts:      regionServiceClientConfigAzure <= 0.0.4
 Conflicts:      regionServiceClientConfigSAPAzure <= 1.0.1
