@@ -166,7 +166,7 @@ def test_get_latest_api_version(request_mock, urlopen_mock,
         None, 400, 'Bad Request', 'error', stderr_mock
     )
     request_mock.side_effect = http_err
-    assert azuremetadata.AzureMetadata._get_api('latest') == '2017-04-02'
+    assert azuremetadata.AzureMetadata._get_api('latest') == '2017-03-01'
 
 
 @patch('json.loads')

@@ -176,5 +176,5 @@ class AzureMetadata:
         if api_versions:
             return sorted(api_versions.get('apiVersions', []), reverse=True)
         # if something went wrong with the query
-        # default to lowest version
-        return ['2017-04-02']
+        # default to oldest version
+        return ['2017-03-01']
