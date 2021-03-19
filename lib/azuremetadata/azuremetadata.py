@@ -131,7 +131,7 @@ class AzureMetadata:
         return False
 
     @staticmethod
-    def _make_request(url, no_api=False):
+    def _make_request(url):
         tries = 0
         last_error = None
         while tries < 5:
@@ -144,12 +144,6 @@ class AzureMetadata:
                     data = data.decode('utf-8')
                 return json.loads(data)
             except urllib.error.HTTPError as e:
-                if no_api:
-                    err = e.read()
-                    if isinstance(err, bytes):
-                        err = err.decode('utf-8')
-                    if 'newest-versions' in err:
-                        return err
                 print("An error occurred when fetching metadata:",
                       file=sys.stderr)
                 print(e, file=sys.stderr)
@@ -176,13 +170,11 @@ class AzureMetadata:
 
     @staticmethod
     def _get_api_newest_versions():
-        newest_api = ['2017-04-02']
-        # When no API version is specified,
-        # the response includes a list of the newest supported versions.
-        no_api_version_result = AzureMetadata._make_request(
-            "http://169.254.169.254/metadata/instance", True
+        api_versions = AzureMetadata._make_request(
+            "http://169.254.169.254/metadata/versions"
         )
-        if no_api_version_result:
-            data = json.loads(no_api_version_result)
-            newest_api = data['newest-versions']
-        return newest_api
+        if api_versions:
+            return sorted(api_versions.get('apiVersions', []), reverse=True)
+        # if something went wrong with the query
+        # default to lowest version
+        return ['2017-04-02']
