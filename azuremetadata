@@ -52,7 +52,7 @@ try:
     # internal server error, that's the best thing we have to go on to
     # figure out whether or not we are in ASM.
     # ASM gets retired in 2023, rip this code out, it's ugly!
-    attested_data_url = 'http://169.254.169.254/metadata/attested/document'
+    attested_data_url = 'http://169.254.169.254/metadata/instance/compute'
     req = urllib.request.Request(
         '%s?api-version=2019-11-01' % attested_data_url,
         headers={'Metadata': 'true'}
@@ -60,7 +60,7 @@ try:
     try:
         response = urllib.request.urlopen(req, timeout=2)
     except urllib.error.HTTPError as e:
-        if e.getcode() == 500:
+        if e.getcode() == 404:
             # Set the api version to the first implementation, it works in ASM
             metadata.set_api_version('2017-04-02')
             # Special code for SUSE, ugh becasue we know what we are
@@ -90,7 +90,7 @@ try:
             data['attestedData']['signature'] = ''
             data['signature'] = ''
     # End code removal in 2023
-    
+
     # Only root can read the tag only add the value if we are root
     if os.geteuid() == 0:
         data['billingTag'] = metadata.get_disk_tag(api_args.device)
