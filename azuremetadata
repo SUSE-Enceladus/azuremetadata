@@ -44,6 +44,9 @@ with io.StringIO() as string_io:
     parser.print_help(string_io)
     help_header = string_io.getvalue()
 
+# IMDS is not intended to be used behind a proxy and IMDS does not support it
+os.environ['no_proxy'] = '169.254.169.254'
+
 try:
     metadata = azuremetadata.AzureMetadata(api_args.api)
     data = {}
@@ -90,7 +93,7 @@ try:
             data['attestedData']['signature'] = ''
             data['signature'] = ''
     # End code removal in 2023
-    
+
     # Only root can read the tag only add the value if we are root
     if os.geteuid() == 0:
         data['billingTag'] = metadata.get_disk_tag(api_args.device)
