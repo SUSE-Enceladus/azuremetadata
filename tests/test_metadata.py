@@ -152,16 +152,12 @@ def test_find_block_device(lsblk_mock, fixture_file_name, mountpoint, expected_d
 @patch('urllib.request.Request')
 def test_get_latest_api_version(request_mock, urlopen_mock,
                                 stderr_mock):
-    output = {"newest-versions": ["bar"]}
-    stderr_mock.read.return_value = json.dumps(output).encode('utf-8')
-    http_err = urllib.error.HTTPError(
-        None, 400, 'Bad Request', 'error', stderr_mock
-    )
-    request_mock.side_effect = http_err
+    output = {"apiVersions": ["1", "2"]}
+    urlopen_mock.return_value.read.return_value = json.dumps(output).encode('utf-8')
 
-    assert azuremetadata.AzureMetadata._get_api('latest') == 'bar'
+    assert azuremetadata.AzureMetadata._get_api('latest') == '2'
     request_mock.assert_called_with(
-        'http://169.254.169.254/metadata/instance',
+        'http://169.254.169.254/metadata/versions',
         headers={'Metadata': 'true'}
     )
 
@@ -170,7 +166,7 @@ def test_get_latest_api_version(request_mock, urlopen_mock,
         None, 400, 'Bad Request', 'error', stderr_mock
     )
     request_mock.side_effect = http_err
-    assert azuremetadata.AzureMetadata._get_api('latest') == '2017-04-02'
+    assert azuremetadata.AzureMetadata._get_api('latest') == '2017-03-01'
 
 
 @patch('json.loads')
@@ -248,9 +244,32 @@ def test_get_all(request_mock, urlopen_mock):
     assert data['foo'] == 'bar'
 
 
-@patch('azuremetadata.azuremetadata.AzureMetadata._get_api_newest_versions')
-def test_show_api_versions(newest_api_mock):
-    newest_api_mock.return_value = ['foo', 'bar']
+@patch('urllib.request.urlopen')
+@patch('urllib.request.Request')
+def test_show_api_versions(mock_request, urlopen_mock):
+    api_output = {
+        'apiVersions':[
+            '2017-03-01',
+            '2017-04-02',
+            '2017-08-01',
+            '2019-04-30',
+            '2019-11-01',
+            '2020-06-01'
+        ]
+    }
+    expected_versions = [
+        '2020-06-01',
+        '2019-11-01',
+        '2019-04-30',
+        '2017-08-01',
+        '2017-04-02',
+        '2017-03-01'
+    ]
 
+    urlopen_mock.return_value.read.return_value = json.dumps(api_output)
     metadata = azuremetadata.AzureMetadata()
-    assert metadata.list_api_versions() == ['foo', 'bar']
+    assert metadata.list_api_versions() == expected_versions
+    mock_request.assert_called_with(
+        'http://169.254.169.254/metadata/versions',
+        headers={'Metadata': 'true'}
+    )
