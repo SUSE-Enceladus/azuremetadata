@@ -18,7 +18,7 @@
 
 %define upstream_name azuremetadata
 Name:           python3-azuremetadata
-Version:        5.1.2
+Version:        5.1.3
 # Packaged renamed in SLE15
 Provides:       azuremetadata = %{version}
 Obsoletes:      azuremetadata < 5.0.0
