@@ -145,7 +145,7 @@ class AzureMetadata:
                 return json.loads(data)
             except urllib.error.HTTPError as e:
                 # remove this case when versions API
-                # endpoint includes license type
+                # endpoint retrieves all the versions
                 if no_api:
                     err = e.read()
                     if isinstance(err, bytes):
