@@ -152,12 +152,16 @@ def test_find_block_device(lsblk_mock, fixture_file_name, mountpoint, expected_d
 @patch('urllib.request.Request')
 def test_get_latest_api_version(request_mock, urlopen_mock,
                                 stderr_mock):
-    output = {"apiVersions": ["1", "2"]}
-    urlopen_mock.return_value.read.return_value = json.dumps(output).encode('utf-8')
+    output = {"newest-versions": ["foo"]}
+    stderr_mock.read.return_value = json.dumps(output).encode('utf-8')
+    http_err = urllib.error.HTTPError(
+        None, 400, 'Bad Request', 'error', stderr_mock
+    )
+    request_mock.side_effect = http_err
 
-    assert azuremetadata.AzureMetadata._get_api('latest') == '2'
+    assert azuremetadata.AzureMetadata._get_api('latest') == 'foo'
     request_mock.assert_called_with(
-        'http://169.254.169.254/metadata/versions',
+        'http://169.254.169.254/metadata/instance',
         headers={'Metadata': 'true'}
     )
 
@@ -243,10 +247,11 @@ def test_get_all(request_mock, urlopen_mock):
     assert data['attestedData'] == expected_data
     assert data['foo'] == 'bar'
 
-
+@patch('sys.stderr')
 @patch('urllib.request.urlopen')
 @patch('urllib.request.Request')
-def test_show_api_versions(mock_request, urlopen_mock):
+def test_show_api_versions(mock_request, urlopen_mock,
+                           stderr_mock):
     api_output = {
         'apiVersions':[
             '2017-03-01',
@@ -273,3 +278,15 @@ def test_show_api_versions(mock_request, urlopen_mock):
         'http://169.254.169.254/metadata/versions',
         headers={'Metadata': 'true'}
     )
+
+    mock_request.assert_called_with(
+        'http://169.254.169.254/metadata/versions',
+        headers={'Metadata': 'true'}
+    )
+
+    stderr_mock.read.return_value = b'{"error": "foo"}'
+    http_err = urllib.error.HTTPError(
+        None, 400, 'Bad Request', 'error', stderr_mock
+    )
+    mock_request.side_effect = http_err
+    assert metadata.list_api_versions() == ['2017-03-01']
