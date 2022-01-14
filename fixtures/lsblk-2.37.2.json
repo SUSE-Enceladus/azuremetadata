@@ -1,0 +1,48 @@
+{
+   "blockdevices": [
+      {
+         "name": "xvda",
+         "maj:min": "202:0",
+         "rm": false,
+         "size": "10G",
+         "ro": false,
+         "type": "disk",
+         "mountpoints": [
+             null
+         ],
+         "children": [
+            {
+               "name": "xvda1",
+               "maj:min": "202:1",
+               "rm": false,
+               "size": "2M",
+               "ro": false,
+               "type": "part",
+               "mountpoints": [
+                   null
+               ]
+            },{
+               "name": "xvda2",
+               "maj:min": "202:2",
+               "rm": false,
+               "size": "20M",
+               "ro": false,
+               "type": "part",
+               "mountpoints": [
+                   "/boot/efi"
+               ]
+            },{
+               "name": "xvda3",
+               "maj:min": "202:3",
+               "rm": false,
+               "size": "10G",
+               "ro": false,
+               "type": "part",
+               "mountpoints": [
+                   "/"
+               ]
+            }
+         ]
+      }
+   ]
+}

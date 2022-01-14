@@ -122,8 +122,14 @@ class AzureMetadata:
     @staticmethod
     def _blockdevice_has_mountpoint(item, mountpoint):
         for child in item.get("children", []):
-            if child["mountpoint"] == mountpoint:
-                return True
+            mounts = child.get('mountpoint')
+            if mounts:
+                mounts = [mounts]
+            else:
+                mounts = child.get('mountpoints', [])
+            for entry in mounts:
+                if entry == mountpoint:
+                    return True
 
             if AzureMetadata._blockdevice_has_mountpoint(child, mountpoint):
                 return True
