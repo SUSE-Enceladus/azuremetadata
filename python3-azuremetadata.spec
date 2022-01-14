@@ -18,7 +18,7 @@
 
 %define upstream_name azuremetadata
 Name:           python3-azuremetadata
-Version:        5.1.4
+Version:        5.1.5
 # Packaged renamed in SLE15
 Provides:       azuremetadata = %{version}
 Obsoletes:      azuremetadata < 5.0.0
@@ -32,6 +32,7 @@ Url:            https://github.com/SUSE-Enceladus/azuremetadata
 Source0:        %{name}-%{version}.tar.bz2
 Requires:       python3
 Recommends:     util-linux
+BuildRequires:  python-rpm-macros
 BuildRequires:  python3-setuptools
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildArch:      noarch

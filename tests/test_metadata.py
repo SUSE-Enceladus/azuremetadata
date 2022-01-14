@@ -136,9 +136,11 @@ def test_get_attested_data(request_mock, urlopen_mock):
         ('lsblk-lvm.json', '/', '/dev/sda'),
         ('lsblk-lvm.json', '/home', '/dev/sda'),
         ('lsblk-nvme.json', '/', '/dev/nvme0n1'),
+        ('lsblk-2.37.2.json', '/', '/dev/xvda')
     ]
 )
-def test_find_block_device(lsblk_mock, fixture_file_name, mountpoint, expected_device_name):
+def test_find_block_device(
+        lsblk_mock, fixture_file_name, mountpoint, expected_device_name):
     with open(str.format('./fixtures/{}', fixture_file_name), 'rb') as file:
         fixture = file.read()
     lsblk_mock.return_value = (fixture, None)
