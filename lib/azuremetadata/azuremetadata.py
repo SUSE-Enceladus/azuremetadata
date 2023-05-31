@@ -137,7 +137,7 @@ class AzureMetadata:
         return False
 
     @staticmethod
-    def _make_request(url, no_api=False):
+    def _make_request(url):
         tries = 0
         last_error = None
         while tries < 5:
@@ -150,14 +150,6 @@ class AzureMetadata:
                     data = data.decode('utf-8')
                 return json.loads(data)
             except urllib.error.HTTPError as e:
-                # remove this case when versions API
-                # endpoint retrieves all the versions
-                if no_api:
-                    err = e.read()
-                    if isinstance(err, bytes):
-                        err = err.decode('utf-8')
-                    if 'newest-versions' in err:
-                        return err
                 print("An error occurred when fetching metadata:",
                       file=sys.stderr)
                 print(e, file=sys.stderr)
@@ -178,11 +170,7 @@ class AzureMetadata:
     def _get_api(api_version):
         """Return the latest API version available if 'latest' provided or api_version."""
         if api_version == 'latest':
-            # the endpoint GET /metadata/versions
-            # does not return all the API versions
-            # excluding the version that returns license type inside attested data
-            # when that gets fixed, use _get_api_newest_versions() method
-            api_newest_versions = AzureMetadata._get_api_unlisted_versions()
+            api_newest_versions = AzureMetadata._get_api_newest_versions()
             api_version = api_newest_versions[0]
         return api_version
 
@@ -196,16 +184,3 @@ class AzureMetadata:
         # if something went wrong with the query
         # default to oldest version
         return ['2017-03-01']
-
-    @staticmethod
-    def _get_api_unlisted_versions():
-        newest_api = ['2017-03-01']
-        # When no API version is specified,
-        # the response includes a list of the newest supported versions.
-        no_api_version_result = AzureMetadata._make_request(
-            "http://169.254.169.254/metadata/instance", True
-        )
-        if no_api_version_result:
-            data = json.loads(no_api_version_result)
-            newest_api = data['newest-versions']
-        return newest_api
