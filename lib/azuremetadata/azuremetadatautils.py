@@ -146,9 +146,14 @@ class AzureMetadataUtils:
                     value = self._data.get(arg)
 
             if isinstance(value, list):
-                root = value[argval]
-                parents.append(arg)
-                continue
+                try:
+                    root = value[argval]
+                    parents.append(arg)
+                    continue
+                except IndexError:
+                    # in case of empty list attributes
+                    # instead of empty strings or None
+                    pass
 
             if isinstance(value, dict):
                 root = value

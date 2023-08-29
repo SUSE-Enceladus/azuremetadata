@@ -27,6 +27,7 @@ data = {
         'baz': [
             {'bar': {'foo': 2}},
             {'bar': {'foo': 3}},
+            {'foobar': []},
         ],
         'test': 4
 }
@@ -42,6 +43,7 @@ def test_help(capsys):
         --baz 1
             --bar
                 --foo
+        --baz 2
         --test
     """).lstrip()
 
@@ -63,6 +65,7 @@ def test_print_pretty(capsys):
         baz[1]:
             bar:
                 foo: 3
+        baz[2]:
         test: 4
     """).lstrip()
 
@@ -89,6 +92,8 @@ def test_pretty_print(capsys):
             <foo>3</foo>
         </bar>
     </baz>
+    <baz index='2'>
+    </baz>
     <test>4</test>
     """).lstrip()
 
@@ -102,7 +107,7 @@ def test_pretty_print(capsys):
 
 def test_print_xml(capsys):
     expected_output = '<document>{"foo": {"bar": 1}, "baz": [{"bar": {"foo": 2}}, ' \
-            '{"bar": {"foo": 3}}], "test": 4}</document>\n'
+            '{"bar": {"foo": 3}}, {"foobar": []}], "test": 4}</document>\n'
 
     util = azuremetadatautils.AzureMetadataUtils(data)
     util.print_pretty(print_xml=True)
@@ -113,7 +118,7 @@ def test_print_xml(capsys):
 
 
 def test_print_json(capsys):
-    expected_output = """{"foo": {"bar": 1}, "baz": [{"bar": {"foo": 2}}, {"bar": {"foo": 3}}], "test": 4}\n"""
+    expected_output = """{"foo": {"bar": 1}, "baz": [{"bar": {"foo": 2}}, {"bar": {"foo": 3}}, {"foobar": []}], "test": 4}\n"""
 
     util = azuremetadatautils.AzureMetadataUtils(data)
     util.print_pretty(print_json=True)
@@ -145,17 +150,17 @@ def test_query_unfinished():
 
 def test_query_nothing_found():
     util = azuremetadatautils.AzureMetadataUtils(data)
-    args = [('foobar', True)]
+    args = [('42', True)]
 
     with pytest.raises(azuremetadatautils.QueryException) as e:
         util.query(args)
 
-    assert str(e.value) == "Nothing found for 'foobar'"
+    assert str(e.value) == "Nothing found for '42'"
 
 
 def test_query_nested_nothing_found():
     util = azuremetadatautils.AzureMetadataUtils(data)
-    args = [('baz', 1), ('bar', True), ('test', True)]
+    args = [('baz', 0), ('bar', True), ('test', True)]
 
     with pytest.raises(azuremetadatautils.QueryException) as e:
         util.query(args)
@@ -189,16 +194,27 @@ def test_query_list_index():
 
     assert result == {'baz': { 'bar': {'foo': 3}}}
 
+def test_query_list_index_empty_attributes():
+    util = azuremetadatautils.AzureMetadataUtils(data)
+    args = [('baz', 2), ('foobar', True)]
+
+    result = util.query(args)
+
+    assert result == {'baz': { 'foobar': []}}
 
 def test_available_params():
     util = azuremetadatautils.AzureMetadataUtils(data)
 
     flattened_data = {
+        'foo': 2,
         'foo': 3,
+        'bar': {'foo': 2},
         'bar': {'foo': 3},
+        'foobar': [],
         'baz': [
             {'bar': {'foo': 2}},
-            {'bar': {'foo': 3}}
+            {'bar': {'foo': 3}},
+            {'foobar': []}
         ],
         'test': 4
     }
