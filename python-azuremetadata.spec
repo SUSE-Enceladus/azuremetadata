@@ -1,7 +1,7 @@
 #
-# spec file for package python3-azuremetadata
+# spec file for package python-azuremetadata
 #
-# Copyright (c) 2020 SUSE LLC
+# Copyright (c) 2025 SUSE LLC
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -12,54 +12,62 @@
 # license that conforms to the Open Source Definition (Version 1.9)
 # published by the Open Source Initiative.
 
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
+# Please submit bugfixes or comments via https://bugs.opensuse.org/
 #
 
+%if 0%{?suse_version} >= 1600
+%define pythons %{primary_python}
+%else
+%{?sle15_python_module_pythons}
+%endif
+%global _sitelibdir %{%{pythons}_sitelib}
 
 %define upstream_name azuremetadata
-Name:           python3-azuremetadata
+Name:           python-azuremetadata
 Version:        5.1.6
-# Packaged renamed in SLE15
-Provides:       azuremetadata = %{version}
-Obsoletes:      azuremetadata < 5.0.0
-Conflicts:      regionServiceClientConfigAzure <= 0.0.4
-Conflicts:      regionServiceClientConfigSAPAzure <= 1.0.1
 Release:        0
 Summary:        Python module for collecting instance metadata from Azure
 License:        GPL-3.0-or-later
 Group:          System/Management
-Url:            https://github.com/SUSE-Enceladus/azuremetadata
+URL:            https://github.com/SUSE-Enceladus/azuremetadata
 Source0:        %{name}-%{version}.tar.bz2
-Requires:       python3
-Recommends:     util-linux
+Requires:       python
+BuildRequires:  %{pythons}-pip
+BuildRequires:  %{pythons}-setuptools
+BuildRequires:  %{pythons}-wheel
+BuildRequires:  fdupes
 BuildRequires:  python-rpm-macros
-BuildRequires:  python3-setuptools
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+Recommends:     util-linux
+Conflicts:      regionServiceClientConfigAzure <= 0.0.4
+Conflicts:      regionServiceClientConfigSAPAzure <= 1.0.1
+# Package renamed in SLE15
+Obsoletes:      azuremetadata < 5.0.0
+Obsoletes:      python3-azuremetadata < %{version}
 BuildArch:      noarch
+
 
 %description
 A module for collecting instance metadata from Microsoft Azure.
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q
 
 %build
-python3 setup.py build
+%pyproject_wheel
 
 %install
-python3 setup.py install --prefix=%{_prefix} --root=%{buildroot}
+%pyproject_install
 install -d -m 755 %{buildroot}/%{_mandir}/man1
 install -m 644 man/man1/azuremetadata.1 %{buildroot}/%{_mandir}/man1
-gzip %{buildroot}/%{_mandir}/man1/azuremetadata.1
+%fdupes %{buildroot}%{$python_sitelib}
+
 
 %files
-%defattr(-,root,root,-)
 %doc README.md
 %license LICENSE
-%{_mandir}/man*/*
-%dir %{python3_sitelib}/%{upstream_name}
-%dir %{python3_sitelib}/%{upstream_name}-%{version}-py%{py3_ver}.egg-info
-%{_bindir}/*
-%{python3_sitelib}/*
+%{_bindir}/%{upstream_name}
+%{python_sitelib}/%{upstream_name}
+%{python_sitelib}/%{upstream_name}-%{version}*-info
+%{_mandir}/man1/%{upstream_name}.1%{?ext_man}
 
 %changelog

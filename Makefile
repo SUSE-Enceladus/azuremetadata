@@ -1,6 +1,6 @@
 DESTDIR=
 PREFIX=
-NAME=python3-azuremetadata
+NAME=python-azuremetadata
 dirs=lib man
 files=Makefile README.md LICENSE azuremetadata setup.py
 
