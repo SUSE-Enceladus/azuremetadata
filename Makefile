@@ -17,7 +17,10 @@ test:
 coverage:
 	PYTHONPATH=./lib pytest --cov-report html --cov=lib/ --cov-report term-missing
 
-tar:
+clean:
+	rm -rf lib/azuremetadata/__pycache__
+
+tar: clean
 	mkdir "$(NAME)-$(verSrc)"
 	cp -r $(dirs) $(files) "$(NAME)-$(verSrc)"
 	tar -cjf "$(NAME)-$(verSrc).tar.bz2" "$(NAME)-$(verSrc)"

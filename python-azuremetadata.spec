@@ -20,7 +20,6 @@
 %else
 %{?sle15_python_module_pythons}
 %endif
-%global _sitelibdir %{%{pythons}_sitelib}
 
 %define upstream_name azuremetadata
 Name:           python-azuremetadata
@@ -31,7 +30,6 @@ License:        GPL-3.0-or-later
 Group:          System/Management
 URL:            https://github.com/SUSE-Enceladus/azuremetadata
 Source0:        %{name}-%{version}.tar.bz2
-Requires:       python
 BuildRequires:  %{pythons}-pip
 BuildRequires:  %{pythons}-setuptools
 BuildRequires:  %{pythons}-wheel
@@ -59,7 +57,7 @@ A module for collecting instance metadata from Microsoft Azure.
 %pyproject_install
 install -d -m 755 %{buildroot}/%{_mandir}/man1
 install -m 644 man/man1/azuremetadata.1 %{buildroot}/%{_mandir}/man1
-%fdupes %{buildroot}%{$python_sitelib}
+%fdupes %{buildroot}%{python_sitelib}
 
 
 %files
