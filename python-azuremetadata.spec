@@ -20,6 +20,7 @@
 %else
 %{?sle15_python_module_pythons}
 %endif
+%global _sitelibdir %{%{pythons}_sitelib}
 
 %define upstream_name azuremetadata
 Name:           python-azuremetadata
@@ -29,7 +30,7 @@ Summary:        Python module for collecting instance metadata from Azure
 License:        GPL-3.0-or-later
 Group:          System/Management
 URL:            https://github.com/SUSE-Enceladus/azuremetadata
-Source0:        %{name}-%{version}.tar.bz2
+Source0:        %{upstream_name}-%{version}.tar.bz2
 BuildRequires:  %{pythons}-pip
 BuildRequires:  %{pythons}-setuptools
 BuildRequires:  %{pythons}-wheel
@@ -41,6 +42,10 @@ Conflicts:      regionServiceClientConfigSAPAzure <= 1.0.1
 # Package renamed in SLE15
 Obsoletes:      azuremetadata < 5.0.0
 Obsoletes:      python3-azuremetadata < %{version}
+Obsoletes:      python310-azuremetadata < %{version}
+Obsoletes:      python311-azuremetadata < %{version}
+Obsoletes:      python312-azuremetadata < %{version}
+Obsoletes:      python313-azuremetadata < %{version}
 BuildArch:      noarch
 
 
@@ -48,7 +53,7 @@ BuildArch:      noarch
 A module for collecting instance metadata from Microsoft Azure.
 
 %prep
-%setup -q
+%autosetup -p1 -n %{upstream_name}-%{version}
 
 %build
 %pyproject_wheel
@@ -57,15 +62,15 @@ A module for collecting instance metadata from Microsoft Azure.
 %pyproject_install
 install -d -m 755 %{buildroot}/%{_mandir}/man1
 install -m 644 man/man1/azuremetadata.1 %{buildroot}/%{_mandir}/man1
-%fdupes %{buildroot}%{python_sitelib}
+%fdupes %{buildroot}%{_sitelibdir}
 
 
 %files
 %doc README.md
 %license LICENSE
 %{_bindir}/%{upstream_name}
-%{python_sitelib}/%{upstream_name}
-%{python_sitelib}/%{upstream_name}-%{version}*-info
+%{_sitelibdir}/%{upstream_name}
+%{_sitelibdir}/%{upstream_name}-%{version}*-info
 %{_mandir}/man1/%{upstream_name}.1%{?ext_man}
 
 %changelog
